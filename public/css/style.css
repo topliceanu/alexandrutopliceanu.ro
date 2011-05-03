@@ -171,57 +171,27 @@ a:hover { color: #036; }
 	width: 600px; 
 	margin: auto;
 	text-align: center;
-	font-size: 2em;
+	font-size: 2.8em;
+	font-family: 'Molengo';
+	/*text-shadow: 1px 1px 0 black , 2px 2px 0 #476871, 3px 3px 0 #476871, 4px 4px 0 #476871, 5px 5px 0 #476871, 6px 6px 0 #476871, 7px 7px 0 #476871;*/
 }
 #main ul{
 	list-style: none;
+	margin-left : 0px ;
+	font-size: 0.9em ;
 }
 img {
-	width: 20px;
-	height: 20px;
+	width: 25px;
+	height: 25px;
 }
-#main .about div:first, #main .about ul{
-	float: left;
+header{
 }
-
-
-/*word styling*/
-.intro .word1{
-	font: bold 3em "Molengo" ;
+header ul{
+	list-style: none ;
 }
-.intro .word2{
-	font: italic 2.3em "Old Standard TT" ;
+header li{
+	float:left;
 }
-.intro .word3{
-	font: 4em "Just Another Hand" ;
-}
-.intro .word4{
-	font: bold 1em "Molengo" ;
-}
-.intro .word5{
-	font: bold 4em "UnifrakturCook" ;
-}
-
-.about .word1{
-	font: italic 3em "Lobster" ;
-}
-.about .word2{
-	font: bold 1.5em "Inconsolata" ;
-}
-.about .word3{
-}
-
-.work {
-}
-#contact {
-}
-
-
-
-
-
-
-
 
 
 
