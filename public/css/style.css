@@ -130,8 +130,8 @@ input:invalid, textarea:invalid {
 /* These selection declarations have to be separate
    No text-shadow: twitter.com/miketaylr/status/12228805301
    Also: hot pink! */
-::-moz-selection{ background: #FF5E99; color:#fff; text-shadow: none; }
-::selection { background:#FF5E99; color:#fff; text-shadow: none; }
+::-moz-selection{ background: #8D2C0C; color:#fff; text-shadow: none; }
+::selection { background:#8D2C0C; color:#fff; text-shadow: 0 1px 0 #777; }
 
 /* j.mp/webkit-tap-highlight-color */
 a:link { -webkit-tap-highlight-color: #FF5E99; }
@@ -150,7 +150,9 @@ button {  width: auto; overflow: visible; }
 
 body, select, input, textarea {
   /* #444 looks better than black: twitter.com/H_FJ/statuses/11800719859 */
-  color: #444;
+	background: rgba(164, 150, 116, 0.2) ;
+  	color: #444;
+	font-family: 'Molengo' ;
   /* Set your base font here, to apply evenly */
   /* font-family: Georgia, serif;  */
 }
@@ -168,29 +170,48 @@ a:hover { color: #036; }
  * Author: Alexandru Topliceanu
  */
 #main{
-	width: 600px; 
-	margin: auto;
-	text-align: center;
-	font-size: 2.8em;
-	font-family: 'Molengo';
-	/*text-shadow: 1px 1px 0 black , 2px 2px 0 #476871, 3px 3px 0 #476871, 4px 4px 0 #476871, 5px 5px 0 #476871, 6px 6px 0 #476871, 7px 7px 0 #476871;*/
-}
-#main ul{
-	list-style: none;
-	margin-left : 0px ;
-	font-size: 0.9em ;
+	width: 900px; 
+	margin : 0 auto;
+	font-size: 3em;
+	font-weight: bold ;
+	text-shadow: 0 1px 0 white ;
 }
 img {
-	width: 25px;
-	height: 25px;
+	width: 1em;
+	height: 1em;
 }
-header{
+.first {
+	margin-top : 40px ;
 }
-header ul{
-	list-style: none ;
+span.left {
+	float : left ;
+	text-align : right ;
+	width : 240px ;
+	visibility : hidden ;
+	color : #8D2C0C ;
+	margin-right: 10px ;
 }
-header li{
-	float:left;
+span.right {
+	float: left ;
+	text-align : left ;
+	width : 650px ;
+}
+.row {
+	overflow: hidden ;	
+	line-height: 1.4 ;
+}
+a, a:visited{
+	text-decoration: none ;
+	color : #8D2C0C ;
+}
+a:hover {
+	background-color: #8D2C0C ;
+	color: rgba(164, 150, 116, 0.2) ;
+	border-radius: 12px; 
+	padding : 2px ;
+}
+.goto {
+	text-align: right ;
 }
 
 

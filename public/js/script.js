@@ -2,7 +2,11 @@
 	Author: Alexandru Topliceanu
 */
 $(function(){
-	//$('#main p.intro').lettering('words');
-	//$('span[class^=word]').
-});
-
+	$('p.row')
+		.bind( 'mouseover', function( ev ){
+			$(this).children('.left').css({'visibility':'visible'}) ;
+		})
+		.bind( 'mouseout', function( ev ){
+			$(this).children('.left').css({'visibility':'hidden'}) ;
+		}) ;
+}) ;
