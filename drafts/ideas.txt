@@ -1,0 +1,94 @@
+* Introduction to the promises and the Q library.
+    - Q philosopy and usage examples
+    - comming from jQuery.Deferred
+* Write about the little known node.js modules powering the big guys
+    - express, mocha, mongoose, flatiron, locomotive, etc.
+* Learning coffeescript
+    - free resources, books, tutorials, code to read (underscore.coffee)
+    - using require.js or coffee -w
+* Coffeescript OOP
+    - describe the compiled js code.
+    - inheritance, abstraction.
+    - mixins.
+* Writing a lib that works both on the browser and in node.
+    - how do you do bullet proof dependency management.
+	- of course this has been done! https://gist.github.com/1262861
+* Explaining fab.js
+    - how it works
+    - example code and apps
+    - get inspiration from fab.js to build tools for your apps
+* Explore node.js streams
+    - readable, writable streams
+    - both-ways and pipable streams.
+    - open source product feed parser library from vibetrace.
+* Third party js applications
+    - challanges: no global vars, iframe communication, loading resources, etc.
+* Event-driven design patterns in javascript
+	- pub/subscribe, event agregator, event pool
+	- underscore utils: run callback after n calls
+	- event composition and patterns
+	- should include the new nodejs pipes, se mikeal and felixge's libs and posts on this
+	- continuations, function streams like the ones in fab.js
+* Build an example coffeescript app: a timer
+    - also publish it on heroku
+    - make it as a showcase of js oop
+    - use jquery, backbone, underscore, require
+
+
+
+OLD
+===
+
+1. Write about the little known node.js modules powering the big guys
+2. Write a blog post about building a sencha touch 2 app
+3. Write a blog post about learning coffeescript, free resources, using require.js, using cake and coffee watch.
+
+1. What do you do when you write a lib that works on node/browser/amd but depends on libs that also work both on node/browser/amd
+	- how do you manage dependencies ??
+	- of course this has been done! https://gist.github.com/1262861
+
+2. easy install nodejs on windows, kinda !
+	-install vmware player + ubuntu server + vmware tools + repo + nodejs + npm
+	- follow this:
+		http://www.vmware.com/support/ws5/doc/ws_newguest_tools_linux.html#wp1118025
+		you must have installed make, gcc, linux-headers-2.6.32-33-generic
+
+3. js front-end framework bonanza - addy osmany has one!
+sproutcore, jsmvc, backbone, spine, knockout, sammy.js, socketstream.js, agility.js
+
+3. testing js frameworks overview - there's a lot of them
+
+4. overview of methods to get rid of spagetti code: futures, promises, defered, my impl, etc.
+	-solutions: mine, fab.js, step.js, continuations, promises, jquery deffered, stela's blog post etc...
+	http://msdn.microsoft.com/en-us/scriptjunkie/gg723713.aspx
+	http://wiki.commonjs.org/wiki/Promises/A
+	https://gist.github.com/880102
+	https://github.com/kriskowal/q
+	stepjs.org
+
+5. tutorial on fab.js - this is hard shit!
+6. write a proper tutorial/manual on using node-mysql
+7. write a paper on garbage collection in evented environments
+	e.g. Q: what happens to the objects are binded to the scope of a closure?
+		 A: Memory Leaks! How do we prevent them?
+
+8. how to select a nodejs bloggin platform + introduction( this is a oss blog, join in )
+9. blog on iframe js, cross-messaging, rpc, load jquery on both, more lightweight solutions, ....
+10. a blog about sum.js
+11 . node.js crawler - it's better if you do it in phantom.js
+	- use of jsdom
+
+12. magento tutorial, building a block-only module !!!NOOOOOOO
+13. magento sample exports for magento 1.4.2. The correct way;)
+
+14. modifications in prestashop1.4 vs prestashop1.3
+	a.$product->getProductImg() is absolute now ( squeeqly.php line 222 )
+	b.global var $page_name is defunct ( squeeqly.php line 232 )
+
+15. A blog post on event-driven design patterns in javascript
+	- pub/subscribe, event agregator, event pool
+	- underscore utils: run callback after n calls
+	- advanced patters and event composition
+	+ advantages, uses cases, further references: documents and libraries you can use
+	- should include the new nodejs pipes, se mikeal and felixge's libs and posts on this
+	- talk about function streams like the ones in fab.js
