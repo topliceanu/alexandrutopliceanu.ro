@@ -1,4 +1,5 @@
 languageCode = "en-us"
 title = "alexandru topliceanu"
 baseurl = "http://alexandrutopliceanu.ro/"
-theme = "cocoa"
+theme = "black-and-light"
+publishDir = "docs"

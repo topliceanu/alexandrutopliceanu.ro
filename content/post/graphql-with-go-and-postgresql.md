@@ -1,7 +1,7 @@
 +++
-date = "2017-01-05T21:25:28Z"
+date = "2017-01-21T08:53:38Z"
 title = "graphql with go and postgresql"
-draft = true
+draft = false
 
 +++
 
