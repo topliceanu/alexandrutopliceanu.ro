@@ -1,7 +1,7 @@
 +++
-date = "2017-01-21T08:53:38Z"
+date = "2017-01-05T21:25:28Z"
 title = "graphql with go and postgresql"
-draft = false
+draft = true
 
 +++
 
@@ -11,19 +11,22 @@ draft = false
 
 GraphQL appears hard to use in production: the graph interface is flexible in its modeling capabilities but is a poor match for relational storage, both in terms of implementation and performance.
 
-In this document, we will design and write a simple blogging engine api, with three types of resources (users, posts and comments) and a varied set of functionality (create a user, create a post, add a comment to a post, follow posts and comments from another user, etc.), use PostgreSQL as the backing datastore (chosen because it's a popular relational DB) and write the API implementation in golang (a popular language for writing APIs).
+In this document, we will design and write a simple blogging engine api, with the following specification:
+* three types of resources (users, posts and comments) supporting a varied set of functionality (create a user, create a post, add a comment to a post, follow posts and comments from another user, etc.)
+* use PostgreSQL as the backing data store (chosen because it's a popular relational DB)
+* write the API implementation in golang (a popular language for writing APIs).
 
 We will compare a simple GraphQL implementation with a pure REST alternative in terms of implementation complexity and efficiency for a common scenario: rendering a blog post page.
 
 ## Introduction
 
-GraphQL is an IDL (Interface Definition Language), designers define data types and model information as a graph. Each vertex is an instance of a data type, while edges represent relationships between nodes. This approach if flexible and can accommodate any business domain. However, the problem is that the design process is more involved and traditional data stores don't map well to the graph model. See _Appendix 1_ for more details on this topic.
+GraphQL is an IDL (Interface Definition Language), designers define data types and model information as a graph. Each vertex is an instance of a data type, while edges represent relationships between nodes. This approach is flexible and can accommodate any business domain. However, the problem is that the design process is more complex and traditional data stores don't map well to the graph model. See _Appendix 1_ for more details on this topic.
 
-GraphQL has been first proposed in 2014 by the Facebook Engineering Team. Although interesting and compelling in it's advantages and features, it hasn't seen mass adoption. Developers have to trade REST's simplicity of design, familiarity and rich tooling for GraphQL's flexibility of not being limited to just CRUD and network efficiency (it optimizes for round-trips to the server).
+GraphQL has been first proposed in 2014 by the Facebook Engineering Team. Although interesting and compelling in its advantages and features, it hasn't seen mass adoption. Developers have to trade REST's simplicity of design, familiarity and rich tooling for GraphQL's flexibility of not being limited to just CRUD and network efficiency (it optimizes for round-trips to the server).
 
-Most walkthroughs and tutorials on GraphQL avoid the problem of fetching data from the datastore to resolve queries. That is, how to design a database, using general-purpose, popular storage solutions (like relational databases) to support efficient data retrieval in a GraphQL API.
+Most walkthroughs and tutorials on GraphQL avoid the problem of fetching data from the data store to resolve queries. That is, how to design a database using general-purpose, popular storage solutions (like relational databases) to support efficient data retrieval for a GraphQL API.
 
-This document goes through building a blog engine GraphQL API. It is moderately complex in it's functionality. It is scoped to a familiar business domain to facilitate comparisons with a REST based approach.
+This document goes through building a blog engine GraphQL API. It is moderately complex in its functionality. It is scoped to a familiar business domain to facilitate comparisons with a REST based approach.
 
 The structure of this document is the following:
 * in the first part we will design a GraphQL schema and explain some of features of the language that are used.
