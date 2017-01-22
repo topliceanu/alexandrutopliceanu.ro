@@ -383,3 +383,6 @@ With relational databases, data is modeled in records (or rows, or tuples) and c
 There is also a high probability that, if the application is interested in a particular record, it will need the whole record, not just a single key from it. There is a high probabilty that if the application is interested in a record, it will be interested in its neighbours as well, for instance a table scan. These two observations make relational databases quite efficient. However, for this reason also, the worst use-case scenario for a relational database is random access across all data all the time. This is exactly what graph databases do.
 
 With the advent of SSD drives which have faster random access, cheap RAM memory which makes caching large portions of a graph database possible, better techniques to optimize graph caching and partitioning, graph databases have become a viable storage solution. And most large companies use it: Facebook has the Social Graph, Google has the Knowledge Graph.
+
+
+Comments on [HackerNews](https://news.ycombinator.com/item?id=13454333)
