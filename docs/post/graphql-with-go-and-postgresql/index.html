@@ -376,15 +376,21 @@
 </style>
 
 
-    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="shortcut icon" href="http://alexandrutopliceanu.ro/favicon.ico">
 
     
   </head>
 
   <body>
     <section id=nav>
-      <h1><a href="/"></a></h1>
+      <h1><a href="http://alexandrutopliceanu.ro/">Alexandru Topliceanu</a></h1>
       <ul>
+        
+          <li><a href="mailto:alexandru.topliceanu@gmail.com">Email</a></li>
+        
+          <li><a href="https://github.com/topliceanu">Github</a></li>
+        
+          <li><a href="https://twitter.com/topliceanu">Twitter</a></li>
         
       </ul>
     </section>
@@ -406,24 +412,27 @@
 
 <p>GraphQL appears hard to use in production: the graph interface is flexible in its modeling capabilities but is a poor match for relational storage, both in terms of implementation and performance.</p>
 
-<p>In this document, we will design and write a simple blogging engine api, with three types of resources (users, posts and comments) and a varied set of functionality (create a user, create a post, add a comment to a post, follow posts and comments from another user, etc.), use PostgreSQL as the backing datastore (chosen because it&rsquo;s a popular relational DB) and write the API implementation in golang (a popular language for writing APIs).</p>
+<p>In this document, we will design and write a simple blogging engine API, with the following specification:
+* three types of resources (users, posts and comments) supporting a varied set of functionality (create a user, create a post, add a comment to a post, follow posts and comments from another user, etc.)
+* use PostgreSQL as the backing data store (chosen because it&rsquo;s a popular relational DB)
+* write the API implementation in Golang (a popular language for writing APIs).</p>
 
 <p>We will compare a simple GraphQL implementation with a pure REST alternative in terms of implementation complexity and efficiency for a common scenario: rendering a blog post page.</p>
 
 <h2 id="introduction">Introduction</h2>
 
-<p>GraphQL is an IDL (Interface Definition Language), designers define data types and model information as a graph. Each vertex is an instance of a data type, while edges represent relationships between nodes. This approach if flexible and can accommodate any business domain. However, the problem is that the design process is more involved and traditional data stores don&rsquo;t map well to the graph model. See <em>Appendix 1</em> for more details on this topic.</p>
+<p>GraphQL is an IDL (Interface Definition Language), designers define data types and model information as a graph. Each vertex is an instance of a data type, while edges represent relationships between nodes. This approach is flexible and can accommodate any business domain. However, the problem is that the design process is more complex and traditional data stores don&rsquo;t map well to the graph model. See <em>Appendix 1</em> for more details on this topic.</p>
 
-<p>GraphQL has been first proposed in 2014 by the Facebook Engineering Team. Although interesting and compelling in it&rsquo;s advantages and features, it hasn&rsquo;t seen mass adoption. Developers have to trade REST&rsquo;s simplicity of design, familiarity and rich tooling for GraphQL&rsquo;s flexibility of not being limited to just CRUD and network efficiency (it optimizes for round-trips to the server).</p>
+<p>GraphQL has been first proposed in 2014 by the Facebook Engineering Team. Although interesting and compelling in its advantages and features, it hasn&rsquo;t seen mass adoption. Developers have to trade REST&rsquo;s simplicity of design, familiarity and rich tooling for GraphQL&rsquo;s flexibility of not being limited to just CRUD and network efficiency (it optimizes for round-trips to the server).</p>
 
-<p>Most walkthroughs and tutorials on GraphQL avoid the problem of fetching data from the datastore to resolve queries. That is, how to design a database, using general-purpose, popular storage solutions (like relational databases) to support efficient data retrieval in a GraphQL API.</p>
+<p>Most walkthroughs and tutorials on GraphQL avoid the problem of fetching data from the data store to resolve queries. That is, how to design a database using general-purpose, popular storage solutions (like relational databases) to support efficient data retrieval for a GraphQL API.</p>
 
-<p>This document goes through building a blog engine GraphQL API. It is moderately complex in it&rsquo;s functionality. It is scoped to a familiar business domain to facilitate comparisons with a REST based approach.</p>
+<p>This document goes through building a blog engine GraphQL API. It is moderately complex in its functionality. It is scoped to a familiar business domain to facilitate comparisons with a REST based approach.</p>
 
 <p>The structure of this document is the following:
 * in the first part we will design a GraphQL schema and explain some of features of the language that are used.
-* next is the design of the postgresql database in section two.
-* part three covers the golang implementation of the GraphQL schema designed in part one.
+* next is the design of the PostgreSQL database in section two.
+* part three covers the Golang implementation of the GraphQL schema designed in part one.
 * in part four we compare the task of rendering a blog post page from the perspective of fetching the needed data from the backend.</p>
 
 <h2 id="related">Related</h2>
@@ -435,7 +444,7 @@
 
 <h2 id="modeling-a-blog-engine-in-graphql">Modeling a blog engine in GraphQL</h2>
 
-<p><em>Listing 1</em> contains the entire schema for the blog engine api. It shows the data types of the vertices composing the graph. The relationships between vertices, ie. the edges, are modeled as attributes of a given type.</p>
+<p><em>Listing 1</em> contains the entire schema for the blog engine API. It shows the data types of the vertices composing the graph. The relationships between vertices, ie. the edges, are modeled as attributes of a given type.</p>
 
 <pre><code class="language-graphql">type User {
   id: ID
@@ -485,26 +494,26 @@ type Mutation {
 
 <p>The schema is written in the GraphQL DSL, which is used for defining custom data types, such as <code>User</code>, <code>Post</code> and <code>Comment</code>. A set of primitive data types is also provided by the language, such as <code>String</code>, <code>Boolean</code> and <code>ID</code> (which is an alias of <code>String</code> with the additional semantics of being the unique identifier of a vertex).</p>
 
-<p><code>Query</code> and <code>Mutation</code> are optional types recognized by the parser and used in querying the graph. Reading data from a GraphQL API is equivalent to traversing the graph. As such a starting vertex needs to be provided, this role is fulfilled by the <code>Query</code> type. In this case, all queries to the graph must start with a user specified by id <code>user(id:ID!)</code>. For writing data, the <code>Mutation</code> vertex type is defined. This exposes a set of operations, modeled as parameterized attributes which traverse to (and return) the newly created vertex types. See <em>Listing 2</em> for examples of how these queries might look.</p>
+<p><code>Query</code> and <code>Mutation</code> are optional types recognized by the parser and used in querying the graph. Reading data from a GraphQL API is equivalent to traversing the graph. As such a starting vertex needs to be provided; this role is fulfilled by the <code>Query</code> type. In this case, all queries to the graph must start with a user specified by id <code>user(id:ID!)</code>. For writing data, the <code>Mutation</code> vertex type is defined. This exposes a set of operations, modeled as parameterized attributes which traverse (and return) the newly created vertex types. See <em>Listing 2</em> for examples of how these queries might look.</p>
 
-<p>Vertex attributes can be parameterized, ie. accept arguments. In the context of graph traversal, if a post vertex has multiple comment vertices, you can traverse to just one of them by specifying <code>comment(id: ID)</code>. All this is by design, the designer can choose not to provide direct paths to individual vertices.</p>
+<p>Vertex attributes can be parameterized, ie. accept arguments. In the context of graph traversal, if a post vertex has multiple comment vertices, you can traverse just one of them by specifying <code>comment(id: ID)</code>. All this is by design, the designer can choose not to provide direct paths to individual vertices.</p>
 
 <p>The <code>!</code> character is a type post-fix, works for both primitive or user-defined types and has two semantics:
- * when used for the type of a param in a parametriezed attribute, it means that param is required.
- * when used for the return type of an attribute it means that attribute will not be null when the vertex is retrieved.
+ * when used for the type of a param in a parametriezed attribute, it means that the param is required.
+ * when used for the return type of an attribute it means that the attribute will not be null when the vertex is retrieved.
  * combinations are possible, for instance <code>[Comment!]!</code> represents a list of non-null Comment vertices, where <code>[]</code>, <code>[Comment]</code> are valid, but <code>null, [null], [Comment, null]</code> are not.</p>
 
-<p><em>Listing 2</em> contains a list of curl commands against the blogging api which will populate the graph using mutations and then query it to retrieve data. To run them, follow the instructions in the <a href="https://github.com/topliceanu/graphql-go-example">topliceanu/graphql-go-example</a> repo to build and run the service.</p>
+<p><em>Listing 2</em> contains a list of <em>curl</em> commands against the blogging API which will populate the graph using mutations and then query it to retrieve data. To run them, follow the instructions in the <a href="https://github.com/topliceanu/graphql-go-example">topliceanu/graphql-go-example</a> repo to build and run the service.</p>
 
-<pre><code class="language-bash"># Mutations to create users 1,2 and 3. Mutations also work as queries, in these case we retrieve the ids and emails of the newly created users.
+<pre><code class="language-bash"># Mutations to create users 1,2 and 3. Mutations also work as queries, in these cases we retrieve the ids and emails of the newly created users.
 curl -XPOST http://vm:8080/graphql -d 'mutation {createUser(email:&quot;user1@x.co&quot;){id, email}}'
 curl -XPOST http://vm:8080/graphql -d 'mutation {createUser(email:&quot;user2@x.co&quot;){id, email}}'
 curl -XPOST http://vm:8080/graphql -d 'mutation {createUser(email:&quot;user3@x.co&quot;){id, email}}'
-# Mutations to add posts for the users. We retrive their ids to comply with the schema, otherwise we will get an error.
+# Mutations to add posts for the users. We retrieve their ids to comply with the schema, otherwise we will get an error.
 curl -XPOST http://vm:8080/graphql -d 'mutation {createPost(user:1,title:&quot;post1&quot;,body:&quot;body1&quot;){id}}'
 curl -XPOST http://vm:8080/graphql -d 'mutation {createPost(user:1,title:&quot;post2&quot;,body:&quot;body2&quot;){id}}'
 curl -XPOST http://vm:8080/graphql -d 'mutation {createPost(user:2,title:&quot;post3&quot;,body:&quot;body3&quot;){id}}'
-# Mutations to all comments to posts. `createComment` expects the user's ID a title and a body. See the schema in Listing 1.
+# Mutations to all comments to posts. `createComment` expects the user's ID, a title and a body. See the schema in Listing 1.
 curl -XPOST http://vm:8080/graphql -d 'mutation {createComment(user:2,post:1,title:&quot;comment1&quot;,body:&quot;comment1&quot;){id}}'
 curl -XPOST http://vm:8080/graphql -d 'mutation {createComment(user:1,post:3,title:&quot;comment2&quot;,body:&quot;comment2&quot;){id}}'
 curl -XPOST http://vm:8080/graphql -d 'mutation {createComment(user:3,post:3,title:&quot;comment3&quot;,body:&quot;comment3&quot;){id}}'
@@ -519,27 +528,27 @@ curl -XPOST http://vm:8080/graphql -d '{user(id:2){followers{id, email}}}'
 curl -XPOST http://vm:8080/graphql -d '{user(id:1){followers{id, email}}}'
 # Query to check if user2 is being followed by user1. If so retrieve user1's email, otherwise return null.
 curl -XPOST http://vm:8080/graphql -d '{user(id:2){follower(id:1){email}}}'
-# Query to return ids and email for all the users being followed by user3.
+# Query to return ids and emails for all the users being followed by user3.
 curl -XPOST http://vm:8080/graphql -d '{user(id:3){followees{id, email}}}'
-# Query to retrive the email of user3 if it is being followed by user1.
+# Query to retrieve the email of user3 if it is being followed by user1.
 curl -XPOST http://vm:8080/graphql -d '{user(id:1){followee(id:3){email}}}'
 # Query to fetch user1's post2 and retrieve the title and body. If post2 was not created by user1, null will be returned.
 curl -XPOST http://vm:8080/graphql -d '{user(id:1){post(id:2){title,body}}}'
 # Query to retrieve all data about all the posts of user1.
 curl -XPOST http://vm:8080/graphql -d '{user(id:1){posts{id,title,body}}}'
-# Query to retrive the user who wrote post2, if post2 was written by user1; a contrived example by displays the flexibility of the language.
+# Query to retrieve the user who wrote post2, if post2 was written by user1; a contrived example that displays the flexibility of the language.
 curl -XPOST http://vm:8080/graphql -d '{user(id:1){post(id:2){user{id,email}}}}'
 </code></pre>
 
 <p><em>Listing 2</em></p>
 
-<p>By carefully desiging the mutations and type attributes, powerfull and expressive queries are possible.</p>
+<p>By carefully desiging the mutations and type attributes, powerful and expressive queries are possible.</p>
 
 <h2 id="designing-the-postgresql-database">Designing the PostgreSQL database</h2>
 
-<p>The relational database design is, as usual, driven by the need to avoid data duplication.This approach was chosen for two reasons:
+<p>The relational database design is, as usual, driven by the need to avoid data duplication. This approach was chosen for two reasons:
  1. to show that there is no need for a specialized database technology or to learn and use new design techniques to accommodate a GraphQL API.
- 2. to show that a GraphQL API can still be created on top of existing databases, more specifically databases designed to back REST endpoints or even traditional server-side rendered html websites.</p>
+ 2. to show that a GraphQL API can still be created on top of existing databases, more specifically databases originally designed to power REST endpoints or even traditional server-side rendered HTML websites.</p>
 
 <p>See <em>Appendix 1</em> for a discussion on differences between relational and graph databases with respect to building a GraphQL API. <em>Listing 3</em> shows the SQL commands to create the new database. The database schema generally matches the GraphQL schema. The <code>followers</code> relation needed to be added to support the <code>follow/unfollow</code> mutations.</p>
 
@@ -571,7 +580,7 @@ CREATE TABLE IF NOT EXISTS followers (
 
 <h2 id="golang-api-implementation">Golang API Implementation</h2>
 
-<p>The graphql parser implemented in go and used in this project is <code>github.com/graphql-go/graphql</code>. It contains a query parser, but no schema parser. This requires the programer to build the GraphQL schema in go using the constructs offered by the library. This is unlike the reference <a href="https://github.com/graphql/graphql-js">nodejs implementation</a>, which offers a schema parser and exposes hooks for data fetching. As such the schema in <code>Listing 1</code> is only useful as a guideline and has to be translated into golang code. However, this <em>&ldquo;limitation&rdquo;</em> offers the opportunity to peer behind the levels of abstraction and see how the schema relates to the graph traversal model for retrieving data. <em>Listing 4</em> shows the implementation of the <code>Comment</code> vertex type:</p>
+<p>The GraphQL parser implemented in Go and used in this project is <code>github.com/graphql-go/graphql</code>. It contains a query parser, but no schema parser. This requires the programmer to build the GraphQL schema in Go using the constructs offered by the library. This is unlike the reference <a href="https://github.com/graphql/graphql-js">nodejs implementation</a>, which offers a schema parser and exposes hooks for data fetching. As such the schema in <code>Listing 1</code> is only useful as a guideline and has to be translated into Golang code. However, this <em>&ldquo;limitation&rdquo;</em> offers the opportunity to peer behind the levels of abstraction and see how the schema relates to the graph traversal model for retrieving data. <em>Listing 4</em> shows the implementation of the <code>Comment</code> vertex type:</p>
 
 <pre><code class="language-go">var CommentType = graphql.NewObject(graphql.ObjectConfig{
 	Name: &quot;Comment&quot;,
@@ -637,11 +646,11 @@ func init() {
 
 <p><em>Listing 4</em></p>
 
-<p>Just like in the schema in <em>Listing 1</em>, the <code>Comment</code> type is a structure with three attributes defined statically; <code>id</code>, <code>title</code> and <code>body</code>. Two other attributes <code>user</code> and <code>comment</code> are defined dynamically to avoid circular dependencies.</p>
+<p>Just like in the schema in <em>Listing 1</em>, the <code>Comment</code> type is a structure with three attributes defined statically; <code>id</code>, <code>title</code> and <code>body</code>. Two other attributes <code>user</code> and <code>post</code> are defined dynamically to avoid circular dependencies.</p>
 
-<p>Go does not lend itself well to this kind of dynamic modelling, there is little type checking support, most of the variables in the code are of type <code>interface{}</code> and need to be type asserted. <code>CommentType</code> itself is a varible of type <code>graphql.Object</code> and it&rsquo;s attributes are of type <code>graphql.Field</code>. So, there&rsquo;s not direct translation between the GraphQL DSL and the data structures used in go.</p>
+<p>Go does not lend itself well to this kind of dynamic modeling, there is little type-checking support, most of the variables in the code are of type <code>interface{}</code> and need to be type asserted before use. <code>CommentType</code> itself is a variable of type <code>graphql.Object</code> and its attributes are of type <code>graphql.Field</code>. So, there&rsquo;s no direct translation between the GraphQL DSL and the data structures used in Go.</p>
 
-<p>The <code>resolve</code> function for each field exposes the <code>Source</code> parameter which is a data type vertex representing the previous node in the traversal. All the attributes of a <code>Comment</code> have, as source, the current <code>CommentType</code> vertex. Retrieving the <code>id</code>, <code>title</code> and <code>body</code> are straightforward attribute accessors, while retrieving the <code>user</code> and the <code>post</code> require graph traversals, and thus database queries. The SQL queries are left out of this document because of their simplicity, but they are available in github repository listed in the references section.</p>
+<p>The <code>resolve</code> function for each field exposes the <code>Source</code> parameter which is a data type vertex representing the previous node in the traversal. All the attributes of a <code>Comment</code> have, as source, the current <code>CommentType</code> vertex. Retrieving the <code>id</code>, <code>title</code> and <code>body</code> is  a straightforward attribute access, while retrieving the <code>user</code> and the <code>post</code> requires graph traversals, and thus database queries. The SQL queries are left out of this document because of their simplicity, but they are available in the github repository listed in the <em>References</em> section.</p>
 
 <h2 id="comparison-with-rest-in-common-scenarios">Comparison with REST in common scenarios</h2>
 
@@ -737,31 +746,31 @@ func init() {
 
 <p><em>Listing 5</em></p>
 
-<p>The number of queries to the database, for this scenario, is deliberately identical, but the number of http requests to the API server has been reduced to just one. We argue that the http requests over the Internet are the most costly in this type of application.</p>
+<p>The number of queries to the database for this scenario is deliberately identical, but the number of HTTP requests to the API server has been reduced to just one. We argue that the HTTP requests over the Internet are the most costly in this type of application.</p>
 
 <p>The backend doesn&rsquo;t have to be designed differently to start reaping the benefits of GraphQL, transitioning from REST to GraphQL can be done incrementally. This allows to measure performance improvements and optimize. From this point, the API developer can start to optimize (potentially merge) SQL queries to improve performance. The opportunity for caching is greatly increased, both on the database and API levels.</p>
 
-<p>Abstractions on top of SQL (for instance ORM layers) usually have to contend with the <code>n+1</code> problem. In step <code>4.</code> of the REST example, a client could have had to request the follower status for the author of each comment in separate requests. This is because in REST there is no standard way of expressing relationships between more that two resources, whereas GraphQL was designed to prevent this problem by using nested queries. Here, we cheat, by fetching all the followers of the user and deferring to the client the logic of determining users who commented and also follow the author.</p>
+<p>Abstractions on top of SQL (for instance ORM layers) usually have to contend with the <code>n+1</code> problem. In step <code>4.</code> of the REST example, a client could have had to request the follower status for the author of each comment in separate requests. This is because in REST there is no standard way of expressing relationships between more than two resources, whereas GraphQL was designed to prevent this problem by using nested queries. Here, we cheat by fetching all the followers of the user. We defer to the client the logic of determining the users who commented and also followed the author.</p>
 
 <p>Another difference is fetching more data than the client needs, in order to not break the REST resource abstractions. This is important for bandwidth consumption and battery life spent parsing and storing unneeded data.</p>
 
 <h2 id="conclusions">Conclusions</h2>
 
 <p>GraphQL is a viable alternative to REST because:
-* while it is more difficult to design the API, the process can be done incrementally. For this reason also, it&rsquo;s easy to transition from REST to GraphQL, the two paradigms can coexist without issues.
+* while it is more difficult to design the API, the process can be done incrementally. Also for this reason, it&rsquo;s easy to transition from REST to GraphQL, the two paradigms can coexist without issues.
 * it is more efficient in terms of network requests, even with naive implementations like the one in this document. It also offers more opportunities for query optimization and result caching.
 * it is more efficient in terms of bandwidth consumption and CPU cycles spent parsing results, because it only returns what is needed to render the page.</p>
 
 <p>REST remains very useful if:
 * your API is simple, either has a low number of resources or simple relationships between them.
 * you already work with REST APIs inside your organization and you have the tooling all set up or your clients expect REST APIs from your organization.
-* you have complex ACL policies. In the blog example, a potential feature could allow users to choose which other users can see their email, or their comments on a particular post, or have following be anonymous etc. Optimizing data retrieval and checking complex business rules can be more difficult.</p>
+* you have complex ACL policies. In the blog example, a potential feature could allow users fine-grained control over who can see their email, their posts, their comments on a particular post, whom they follow etc. Optimizing data retrieval while checking complex business rules can be more difficult.</p>
 
 <h2 id="appendix-1-graph-databases-and-efficient-data-storage">Appendix 1: Graph Databases And Efficient Data Storage</h2>
 
 <p>While it is intuitive to think about application domain data as a graph, as this document demonstrates, the question of efficient data storage to support such an interface is still open.</p>
 
-<p>In recent years graph databases have become more popular. Deferring the complexity of resolving the request by translating the GraphQL query into a specific graph database query language, seems like a viable solution.</p>
+<p>In recent years graph databases have become more popular. Deferring the complexity of resolving the request by translating the GraphQL query into a specific graph database query language seems like a viable solution.</p>
 
 <p>The problem is that graphs are not an efficient data structure compared to relational databases. A vertex can have links to any other vertex in the graph and access patterns are less predictable and thus offer less opportunity for optimization.</p>
 
@@ -769,11 +778,11 @@ func init() {
 
 <p>The problem of database sharding: splitting the database into smaller, non-interacting databases, living on separate hardware. In academia, the problem of splitting a graph on the minimal cut is well understood but it is suboptimal and may potentially result in highly unbalanced cuts due to pathological worst-case scenarios.</p>
 
-<p>With relational database, data is modeled in records (or rows, or tuples) and columns, tables and database names are simply namespaces. Most databases are row-oriented, which means that each record is a contiguous chunk of memory, all records in a table are neatly packed one after the other on disk (usually sorted by some key column). This is efficient because it optimizes based on the way physical storage works. The most expensive operation for an HDD is to move the read/write head to another sector on the disk, so minimizing these accesses is critical.</p>
+<p>With relational databases, data is modeled in records (or rows, or tuples) and columns, tables and database names are simply namespaces. Most databases are row-oriented, which means that each record is a contiguous chunk of memory, all records in a table are neatly packed one after the other on the disk (usually sorted by some key column). This is efficient because it is optimal for the way physical storage works. The most expensive operation for an HDD is to move the read/write head to another sector on the disk, so minimizing these accesses is critical.</p>
 
-<p>There is also a high probability that, if the application is interested in a particular record, it will need the whole record, not just a single key from it. There is a high probabilty that if the application is interested in a record, it will be interested in it&rsquo;s neighbours as well, for instance a table scan. These two observations make relational databases quite efficient. However, for this reason also, the worst use-case for a relational database is random access across all data all the time. This is exactly what graph databases do.</p>
+<p>There is also a high probability that, if the application is interested in a particular record, it will need the whole record, not just a single key from it. There is a high probabilty that if the application is interested in a record, it will be interested in its neighbours as well, for instance a table scan. These two observations make relational databases quite efficient. However, for this reason also, the worst use-case scenario for a relational database is random access across all data all the time. This is exactly what graph databases do.</p>
 
-<p>With the advent of SSD drives which have faster random access, cheap RAM memory which makes caching large portions of a graph database possible, better techniques to optimize graph caching and partitioning, graph databases have become a viable storage solution. And most large companies use it: Facebook have the Social Graph, Google have the Knowledge Graph.</p>
+<p>With the advent of SSD drives which have faster random access, cheap RAM memory which makes caching large portions of a graph database possible, better techniques to optimize graph caching and partitioning, graph databases have become a viable storage solution. And most large companies use it: Facebook has the Social Graph, Google has the Knowledge Graph.</p>
 
   </div>
 
@@ -785,6 +794,13 @@ func init() {
 
   </div>
   
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-24987736-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
 </body>
 </html>
 

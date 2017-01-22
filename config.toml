@@ -1,5 +1,22 @@
+author = "alexandru topliceanu"
+baseURL = "http://alexandrutopliceanu.ro/"
+canonifyurls = true
+googleAnalytics = "UA-24987736-1"
 languageCode = "en-us"
-title = "alexandru topliceanu"
-baseurl = "http://alexandrutopliceanu.ro/"
-theme = "black-and-light"
 publishDir = "docs"
+#pygmentsCodeFencesGuessSyntax = true
+pygmentsstyle = "bw"
+title = "alexandru topliceanu"
+theme = "black-and-light"
+
+[params]
+  sitename = "Alexandru Topliceanu"
+[[menu.main]]
+  name = "Github"
+  url  = "https://github.com/topliceanu"
+[[menu.main]]
+  name = "Twitter"
+  url  = "https://twitter.com/topliceanu"
+[[menu.main]]
+  name = "Email"
+  url  = "mailto:alexandru.topliceanu@gmail.com"
