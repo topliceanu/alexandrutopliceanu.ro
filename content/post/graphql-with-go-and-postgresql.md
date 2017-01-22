@@ -12,6 +12,7 @@ draft = false
 GraphQL appears hard to use in production: the graph interface is flexible in its modeling capabilities but is a poor match for relational storage, both in terms of implementation and performance.
 
 In this document, we will design and write a simple blogging engine API, with the following specification:
+
 * three types of resources (users, posts and comments) supporting a varied set of functionality (create a user, create a post, add a comment to a post, follow posts and comments from another user, etc.)
 * use PostgreSQL as the backing data store (chosen because it's a popular relational DB)
 * write the API implementation in Golang (a popular language for writing APIs).
@@ -29,6 +30,7 @@ Most walkthroughs and tutorials on GraphQL avoid the problem of fetching data fr
 This document goes through building a blog engine GraphQL API. It is moderately complex in its functionality. It is scoped to a familiar business domain to facilitate comparisons with a REST based approach.
 
 The structure of this document is the following:
+
 * in the first part we will design a GraphQL schema and explain some of features of the language that are used.
 * next is the design of the PostgreSQL database in section two.
 * part three covers the Golang implementation of the GraphQL schema designed in part one.
@@ -95,6 +97,7 @@ The schema is written in the GraphQL DSL, which is used for defining custom data
 Vertex attributes can be parameterized, ie. accept arguments. In the context of graph traversal, if a post vertex has multiple comment vertices, you can traverse just one of them by specifying `comment(id: ID)`. All this is by design, the designer can choose not to provide direct paths to individual vertices.
 
 The `!` character is a type post-fix, works for both primitive or user-defined types and has two semantics:
+
  * when used for the type of a param in a parametriezed attribute, it means that the param is required.
  * when used for the return type of an attribute it means that the attribute will not be null when the vertex is retrieved.
  * combinations are possible, for instance `[Comment!]!` represents a list of non-null Comment vertices, where `[]`, `[Comment]` are valid, but `null, [null], [Comment, null]` are not.
@@ -352,11 +355,13 @@ Another difference is fetching more data than the client needs, in order to not 
 
 ## Conclusions
 GraphQL is a viable alternative to REST because:
+
 * while it is more difficult to design the API, the process can be done incrementally. Also for this reason, it's easy to transition from REST to GraphQL, the two paradigms can coexist without issues.
 * it is more efficient in terms of network requests, even with naive implementations like the one in this document. It also offers more opportunities for query optimization and result caching.
 * it is more efficient in terms of bandwidth consumption and CPU cycles spent parsing results, because it only returns what is needed to render the page.
 
 REST remains very useful if:
+
 * your API is simple, either has a low number of resources or simple relationships between them.
 * you already work with REST APIs inside your organization and you have the tooling all set up or your clients expect REST APIs from your organization.
 * you have complex ACL policies. In the blog example, a potential feature could allow users fine-grained control over who can see their email, their posts, their comments on a particular post, whom they follow etc. Optimizing data retrieval while checking complex business rules can be more difficult.
