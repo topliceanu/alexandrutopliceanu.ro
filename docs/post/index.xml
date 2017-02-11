@@ -6,8 +6,177 @@
     <description>Recent content in Posts on alexandru topliceanu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 22 Jan 2017 08:28:53 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 11 Feb 2017 15:16:45 +0000</lastBuildDate>
     <atom:link href="http://alexandrutopliceanu.ro/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>quality go code</title>
+      <link>http://alexandrutopliceanu.ro/post/quality-go-code/</link>
+      <pubDate>Sat, 11 Feb 2017 15:16:45 +0000</pubDate>
+      
+      <guid>http://alexandrutopliceanu.ro/post/quality-go-code/</guid>
+      <description>
+
+&lt;h1 id=&#34;quality-golang-code&#34;&gt;Quality Golang Code&lt;/h1&gt;
+
+&lt;p&gt;&lt;em&gt;The tools I use to help produce quality Golang code&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;abstract&#34;&gt;Abstract&lt;/h2&gt;
+
+&lt;p&gt;Go has excellent libraries for source-code parsing. These have enabled the creators of Go and the open source community to produce a variety of tools which help eliminate errors in advance.&lt;/p&gt;
+
+&lt;p&gt;The large number of tools and the lack of documentation on how to best use them presents a problem for engineers.
+This blog post describes the process and the tools I use to improve code quality and catch bugs early in my Go code.
+I will go through linting, testing, code coverage, benchmarking, race detection in concurrent code, memory, CPU and contention profiling.&lt;/p&gt;
+
+&lt;h2 id=&#34;documentation&#34;&gt;Documentation&lt;/h2&gt;
+
+&lt;p&gt;An HTML version can be generated dynamically from a package&amp;rsquo;s source code.
+Running &lt;code&gt;godoc -http=:8080&lt;/code&gt; will start a static HTTP server on &lt;code&gt;0.0.0.0:8080&lt;/code&gt; which will generate on the fly and serve the documentation for all standard library packages as well as all the packages &lt;code&gt;$GOPATH&lt;/code&gt;.
+Go to &lt;code&gt;http://0.0.0.0:8080/pkg/github.com/your/package&lt;/code&gt; to see the live docs of your package as you are developing it. Make sure you document all your exported members.&lt;/p&gt;
+
+&lt;h2 id=&#34;linting&#34;&gt;Linting&lt;/h2&gt;
+
+&lt;p&gt;Code linting is a static analysis technique meant to prevent programmers from doing mistakes commonly seen in a specific language.&lt;/p&gt;
+
+&lt;p&gt;A popular project in Go is &lt;a href=&#34;https://github.com/alecthomas/gometalinter&#34;&gt;go-metalinter&lt;/a&gt;. I found it to be too broad. Instead, I use it as a comprehensive list of &amp;ldquo;best practice&amp;rdquo; tools from which I pick only what I need, depending on the project.
+In particular, I use &lt;code&gt;go fmt&lt;/code&gt; because it is the standard way to format source code.
+I&amp;rsquo;ve given up on &lt;code&gt;goimport&lt;/code&gt; (which also runs &lt;code&gt;go fmt&lt;/code&gt;) because I found the rules to be simple enough to enforce: split standard libraries from everything else with an empty line in the &lt;code&gt;import&lt;/code&gt; statement, then sort the two batches lexicographically.&lt;/p&gt;
+
+&lt;p&gt;I usually use &lt;a href=&#34;https://github.com/Masterminds/glide&#34;&gt;glide&lt;/a&gt; to manage the &lt;code&gt;/vendor&lt;/code&gt; folder in a project. With &lt;em&gt;glide&lt;/em&gt;, you can run &lt;code&gt;go fmt $(glide novendor)&lt;/code&gt; to format all source files except for the ones in &lt;code&gt;/vendor&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;go vet&lt;/code&gt; is another helpful tool detect &amp;ldquo;common&amp;rdquo; Golang mistakes. It works by running a &lt;a href=&#34;https://golang.org/cmd/vet/&#34;&gt;set of heuristics&lt;/a&gt; against the source code and reporting the results. Note that it might return false positives, in the end, it&amp;rsquo;s up to you to decide what is important or not.
+&lt;code&gt;govet&lt;/code&gt; expects Go package names as parameters so, to run it on all your project except for vendored dependencies, use &lt;code&gt;go vet $(go list ./... | grep -v /vendor/)&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/golang/lint&#34;&gt;golint&lt;/a&gt; detects and reports coding style mistakes, it does not rewrite the code as &lt;code&gt;go fmt&lt;/code&gt; does. It is used internally by Google and it is a good base for your company&amp;rsquo;s internal Go style guide. Use &lt;code&gt;go list ./... | grep -v /vendor/ | xargs -L1 golint&lt;/code&gt; to skip the vendored dependencies.&lt;/p&gt;
+
+&lt;p&gt;The Go compiler is very diligent to panic when you import a package you don&amp;rsquo;t use or when you define a variable you don&amp;rsquo;t use, but it doesn&amp;rsquo;t complain when you forget to handle the error returned by a function. For that, I use [errcheck]((&lt;a href=&#34;https://github.com/kisielk/errcheck&#34;&gt;https://github.com/kisielk/errcheck&lt;/a&gt;) and I find it invaluable.&lt;/p&gt;
+
+&lt;h2 id=&#34;testing&#34;&gt;Testing&lt;/h2&gt;
+
+&lt;p&gt;Much ink has been spilled on how to test code and, in particular, Go code. I am not going to go into details here, but do check out the excellent &lt;a href=&#34;https://godoc.org/testing&#34;&gt;testing package docs&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;When developing a service from scratch, I usually start with acceptance tests. It&amp;rsquo;s important to get them right because they help define the API and are going to be used for the whole lifetime of the project.
+When the API protocol matures, I move down to integration and unit tests, often accompanied by redesigns and rewrites of the implementation.&lt;/p&gt;
+
+&lt;p&gt;To ensure that tests only run against the public API of a module, I group tests in a &lt;code&gt;&amp;lt;module&amp;gt;_test&lt;/code&gt; package which has the added benefit of helping define a testable API, enforces dependency injection, component orthogonality, and single responsibility.&lt;/p&gt;
+
+&lt;p&gt;I find testing to be hard! It requires design and maintenance and should not be considered second-class citizen to production code. It usually takes more time to write tests and significantly more code, but I consider this to be the norm and a mark of craftsmanship.&lt;/p&gt;
+
+&lt;p&gt;To run a specific test in your suite, use &lt;code&gt;go test -run=&amp;lt;regexp/matching/test/func/name&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;benchmarking&#34;&gt;Benchmarking&lt;/h2&gt;
+
+&lt;p&gt;Go has inbuilt support for micro-benchmarks. These are similar to unit tests, that is benchmarks measure the performance (time and memory allocations) of individual functions.
+The way this works is that the body of the benchmark is executed enough times to get a statistically relevant measurement of its duration. One word of warning, different runs of the same benchmark function might yield significantly different results if run inside VMs or containers, especially on laptops which perform various power saving and cooling functions. See this &lt;a href=&#34;http://thornydev.blogspot.co.uk/2015/07/an-exercise-in-profiling-go-program.html&#34;&gt;blog post&lt;/a&gt; on the performance gains attainable.&lt;/p&gt;
+
+&lt;p&gt;The Go benchmark framework is part of the &lt;a href=&#34;https://godoc.org/testing&#34;&gt;testing&lt;/a&gt; package. All benchmarks are executed sequentially, but you can run them in parallel with the &lt;code&gt;RunParallel&lt;/code&gt; helper function. This will create multiple goroutines and equally distribute the benchmark iterations amongst them. It&amp;rsquo;s also very effective at detecting race conditions and measuring lock contention.&lt;/p&gt;
+
+&lt;p&gt;For some reason, tests are executed by default when running benchmarks so, to ignore the tests, run &lt;code&gt;go test -run=^$ -bench=.&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;race-detection&#34;&gt;Race Detection&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://golang.org/doc/articles/race_detector.html&#34;&gt;Race detection&lt;/a&gt; is integrated into the Go compiler and is available for &lt;code&gt;go test -race&lt;/code&gt;, &lt;code&gt;go run -race&lt;/code&gt;, &lt;code&gt;go build -race&lt;/code&gt; and &lt;code&gt;go install -race&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;It works by instrumenting every memory access such that when two goroutines read from/write to the same memory address, the program panics. Because of this design, data races can only be detected at runtime and only on code paths that are executed. This &lt;a href=&#34;https://github.com/google/sanitizers/wiki/ThreadSanitizerAlgorithm&#34;&gt;document&lt;/a&gt; describes how the instrumentation algorithm works in detail.&lt;/p&gt;
+
+&lt;p&gt;The best way to detect data races is under realistic production conditions but this approach has a significant performance penalty. Running one instrumented binary in parallel with other non-instrumented binaries in a load-balanced set is a useful approach, especially for alpha stage services.&lt;/p&gt;
+
+&lt;p&gt;Other ways to detect races are:
+- running parallel benchmarks with the &lt;code&gt;-race&lt;/code&gt; flag can catch races with the right test cases.
+- running parallel tests. Go doesn&amp;rsquo;t offer inbuilt support for parallel tests, so you will have to write the framework to do that yourself. In &lt;a href=&#34;https://github.com/bradfitz/talk-yapc-asia-2015/blob/master/talk.md#race-detector&#34;&gt;this example&lt;/a&gt; by Brad Fitzpatrick, multiple goroutines perform the same action under test and a data race is detected.
+- another very good alternative is to run load tests: produce a high volume of requests against your race instrumented binary running in a staging or testing environment. For HTTP services I prefer to use  &lt;a href=&#34;http://github.com/tsenart/vegeta&#34;&gt;vegeta&lt;/a&gt; to perform load testing.&lt;/p&gt;
+
+&lt;p&gt;Typical race conditions are accidentally shared variables, global variables accessed from multiple goroutines, etc. See this documentation article on &lt;a href=&#34;https://golang.org/doc/articles/race_detector.html#Typical_Data_Races&#34;&gt;tipical data race situations&lt;/a&gt;. Fixing these cases requires the use of synchronization primitives, such as those available in the &lt;code&gt;sync&lt;/code&gt; packages or channels to pass control to memory spaces.&lt;/p&gt;
+
+&lt;p&gt;One thing to note is that because of Go&amp;rsquo;s memory model, not even read/writes on primitive data types are &lt;em&gt;not&lt;/em&gt; atomic. The &lt;code&gt;sync/atomic&lt;/code&gt; package has operations to perform atomic reads, atomic writes and atomic “compare and swaps” on ints and pointers.&lt;/p&gt;
+
+&lt;h2 id=&#34;profiling&#34;&gt;Profiling&lt;/h2&gt;
+
+&lt;p&gt;Profiling is also built-in with the Go tools. All types of profilers work in a similar way. An instrumented binary will spawn a separate thread which will send a signal to the main thread at a set interval. That signal will prompt the main thread to respond with data depending on the type of profiling done. The profile thread collects all this data and produces a profile report in binary format, essentially a collection of &lt;a href=&#34;https://developers.google.com/protocol-buffers/&#34;&gt;protobuf objects&lt;/a&gt;, which you can save to disk for analysis using the &lt;code&gt;pprof&lt;/code&gt; tool.&lt;/p&gt;
+
+&lt;p&gt;All profilers are based on sampling, that is they collect data every set period of time, then aggregate it:
+- CPU profiling is useful for detecting slow running functions. It works by collecting stack traces of all currently running goroutines at a high frequency, then cumulating the times spent in each function on the stack. Very fast or infrequently called functions are discarded.
+- Memory profiling is useful to detect functions which allocate relatively large chunks memory.  It works by collecting heap dumps from each running goroutine at high frequency and diffing sequential heap snapshots to count allocations. High memory consumption negatively affects performance because it means Go&amp;rsquo;s &amp;ldquo;stop-the-world&amp;rdquo; garbage collector has more work to do.
+- Block profiling is used to detect lock contention between multiple goroutines and is done by recording when and where each goroutine is blocking.&lt;/p&gt;
+
+&lt;p&gt;There are multiple ways to produce profiles.&lt;/p&gt;
+
+&lt;h3 id=&#34;compiling-an-instrumented-binary&#34;&gt;Compiling an instrumented binary&lt;/h3&gt;
+
+&lt;p&gt;For CPU profiling, you need to use the &lt;a href=&#34;https://godoc.org/runtime/pprof&#34;&gt;runtime/pprof&lt;/a&gt; package. Here&amp;rsquo;s an example of how you might instrument your &lt;code&gt;func main()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;fp = os.Create(profilePath)
+defer fp.Close()
+pprof.StartCPUProfile(fp) // start collecting data.
+defer pprof.StopCPUProfile() // when the process stops, stop the profiler and store the data.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For memory profiling, you need the &lt;a href=&#34;https://godoc.org/runtime&#34;&gt;runtime&lt;/a&gt; and &lt;a href=&#34;https://godoc.org/runtime/pprof&#34;&gt;runtime/pprof&lt;/a&gt; packages.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;fp = os.Create(profilePath)
+defer fp.Close()
+runtime.GC() // trigger a run of the GC to get a clean heap snapshot.
+defer pprof.WriteHeapProfile(fp) // when the process stops, stop the profiler and store the data.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For block profiling, you must use the &lt;a href=&#34;https://godoc.org/runtime&#34;&gt;runtime&lt;/a&gt; package. See &lt;a href=&#34;https://github.com/golang/go/issues/14689&#34;&gt;this GitHub issue&lt;/a&gt; on how to build a block profile.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;fp = os.Create(profilePath)
+defer fp.Close()
+runtime.SetBlockProfileRate(1) // catch every single block event.
+profile = pprof.Lookup(&amp;quot;block&amp;quot;) // fetch the block profile singleton.
+defer profile.WriteTo(fp) // write the profile data before stopping the process.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A couple of observations: first, errors are not being handled in the code above for simplicity reasons, you should definitely do so in your own code; second, the defer statements might not execute, depending on how your program stops, this will lead to the profile information not being transferred from memory to disk.&lt;/p&gt;
+
+&lt;h3 id=&#34;instrument-tests-and-benchmarks&#34;&gt;Instrument tests and benchmarks&lt;/h3&gt;
+
+&lt;p&gt;&lt;code&gt;go test&lt;/code&gt; allows you to pass &lt;code&gt;-cpuprofile=&amp;lt;path/to/store/profile&amp;gt;&lt;/code&gt;, &lt;code&gt;-memprofile=&amp;lt;path/to/store/profile&amp;gt;&lt;/code&gt; or &lt;code&gt;-blockprofile=&amp;lt;path/to/store/profile&amp;gt;&lt;/code&gt; params. These options will build a test or benchmark binary instrumented for the specific profiler, run it and store the profiler report in the specified path at the end of the tests.
+This method has the disadvantage that the profile report will contain data on the testing infrastructure which might have significant overhead.&lt;/p&gt;
+
+&lt;h3 id=&#34;instrument-http-servers&#34;&gt;Instrument HTTP servers&lt;/h3&gt;
+
+&lt;p&gt;For HTTP services, the &lt;code&gt;net/http/pprof&lt;/code&gt; package can be imported to produce profiles on demand. It works by registering a &lt;code&gt;/debug/pprof&lt;/code&gt; path on the default &lt;code&gt;net/http&lt;/code&gt; handler (you can also add it to custom HTTP handlers) which lists all the profiles it can produce.&lt;/p&gt;
+
+&lt;p&gt;You may want to protect this URL with an authentication mechanism, profiling will significantly decrease the performance of your service and could potentially be used in a DOS attack.
+When a specific profile path is requested, say &lt;code&gt;/debug/pprof/profile&lt;/code&gt;, the package starts profiling and writes the output on the HTTP stream to the client.
+The &lt;code&gt;pprof&lt;/code&gt; tool can be used to consume the profile stream from an URL directly, but you can also download the profile locally.&lt;/p&gt;
+
+&lt;h3 id=&#34;how-to-read-a-profile&#34;&gt;How to read a profile&lt;/h3&gt;
+
+&lt;p&gt;The main way to use the profile data is with the built-in &lt;code&gt;pprof&lt;/code&gt; tool. This is based on the &lt;a href=&#34;https://github.com/google/pprof&#34;&gt;google/pprof&lt;/a&gt; project and is now bundled into the Go binary:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;go tool pprof [&amp;lt;path/to/binary&amp;gt;] &amp;lt;path/to/profile&amp;gt;
+pprof&amp;gt; ...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This command will start a &lt;code&gt;pprof&lt;/code&gt; session, which loads up all the profile data and exposes several useful commands:
+- &lt;code&gt;top &amp;lt;N&amp;gt; -cum&lt;/code&gt; lists the top N functions, sorted such that the top listed function consumes the most CPU or memory or has the longest lock times, depending on profile under inspection.
+- &lt;code&gt;list &amp;lt;function&amp;gt;&lt;/code&gt; lists the source code of a function and the lines that are the biggest contributors to resource consumption. You can specify a package name as a prefix to further filter the results. This command needs the binary file to be passed to the &lt;code&gt;pprof&lt;/code&gt; tool in order to produce source code listings.
+- &lt;code&gt;web&lt;/code&gt; opens a browser window containing an SVG image of the execution graph for the profiled program and the time spent or memory consumed in each call. Note that the graph is pruned, only the top offenders are displayed!
+Usually, you start with &lt;code&gt;top&lt;/code&gt; to find suspicious functions then dig deeper with &lt;code&gt;list&lt;/code&gt;. &lt;a href=&#34;https://github.com/bradfitz/talk-yapc-asia-2015/blob/master/talk.md#cpu-profiling&#34;&gt;This&lt;/a&gt; is an example of how the output of these commands looks like.&lt;/p&gt;
+
+&lt;p&gt;When analyzing a memory profile with &lt;code&gt;pprof&lt;/code&gt;, make sure to add the &lt;code&gt;-alloc_space&lt;/code&gt; flag which displays allocated memory sizes, it will make &lt;code&gt;list&lt;/code&gt; better.&lt;/p&gt;
+
+&lt;p&gt;For CPU profiles, a helpful tool I use is &lt;a href=&#34;https://github.com/uber/go-torch&#34;&gt;go-torch&lt;/a&gt;. It works by generating a flame graph, using &lt;a href=&#34;https://github.com/brendangregg/FlameGraph&#34;&gt;brendangregg/FlameGraph&lt;/a&gt; from a profile binary. To produce a flame graph SVG run &lt;code&gt;go-torch &amp;lt;binary&amp;gt; &amp;lt;profile&amp;gt;&lt;/code&gt;, then open it in a browser window.&lt;/p&gt;
+
+&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Discovering these tools, understanding how they work, how to configure and use them is hard work! Once you have them in place, you still don&amp;rsquo;t get a free lunch, often times you need to understand the design decisions in the language implementation, the standard library, or in the third party libraries you are using. The standard library, in particular, has a lot of helper functions which boost productivity but are seldom efficient compared to their low-level counterparts.
+That being said, the level of insight you can get into Go programs with just the built-in tools is impressive and the ecosystem around the language nicely complements its native capabilities.&lt;/p&gt;
+
+&lt;h2 id=&#34;resources&#34;&gt;Resources&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Brad Fitzpatrick&amp;rsquo;s YAPC 2015 talk &amp;ldquo;Profiling and Optimizing Go&amp;rdquo; &lt;a href=&#34;https://www.youtube.com/watch?v=xxDZuPEgbBU&#34;&gt;youtube.com&lt;/a&gt;, &lt;a href=&#34;https://docs.google.com/presentation/d/1lL7Wlh9GBtTSieqHGJ5AUd1XVYR48UPhEloVem-79mA/view#slide=id.p&#34;&gt;slides&lt;/a&gt; and &lt;a href=&#34;https://github.com/bradfitz/talk-yapc-asia-2015/blob/master/talk.md&#34;&gt;writeup&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Francisc Campoy&amp;rsquo;s &amp;ldquo;Go tooling in Action&amp;rdquo; &lt;a href=&#34;https://www.youtube.com/watch?v=uBjoTxosSys&#34;&gt;youtube.com&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Michael Peterson&amp;rsquo;s &amp;ldquo;An Exercise in Profiling a Go Program&amp;rdquo; &lt;a href=&#34;http://thornydev.blogspot.co.uk/2015/07/an-exercise-in-profiling-go-program.html&#34;&gt;link&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Not updated but still good, Golang&amp;rsquo;s blog post &amp;ldquo;Profiling Go Programs&amp;rdquo; &lt;a href=&#34;https://blog.golang.org/profiling-go-programs&#34;&gt;link&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+    </item>
     
     <item>
       <title>graphql with go and postgresql</title>

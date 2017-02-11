@@ -1,7 +1,7 @@
 +++
 date = "2017-02-11T15:16:45Z"
 title = "quality go code"
-draft = true
+draft = false
 
 +++
 

@@ -2,19 +2,24 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://alexandrutopliceanu.ro/post/quality-go-code/</loc>
+    <lastmod>2017-02-11T15:16:45+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://alexandrutopliceanu.ro/post/graphql-with-go-and-postgresql/</loc>
     <lastmod>2017-01-22T08:28:53+00:00</lastmod>
   </url>
   
   <url>
     <loc>http://alexandrutopliceanu.ro/post/</loc>
-    <lastmod>2017-01-22T08:28:53+00:00</lastmod>
+    <lastmod>2017-02-11T15:16:45+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>http://alexandrutopliceanu.ro/</loc>
-    <lastmod>2017-01-22T08:28:53+00:00</lastmod>
+    <lastmod>2017-02-11T15:16:45+00:00</lastmod>
     <priority>0</priority>
   </url>
   
