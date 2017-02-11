@@ -163,3 +163,5 @@ That being said, the level of insight you can get into Go programs with just the
 2. Francisc Campoy's "Go tooling in Action" [youtube.com](https://www.youtube.com/watch?v=uBjoTxosSys)
 3. Michael Peterson's "An Exercise in Profiling a Go Program" [link](http://thornydev.blogspot.co.uk/2015/07/an-exercise-in-profiling-go-program.html)
 4. Not updated but still good, Golang's blog post "Profiling Go Programs" [link](https://blog.golang.org/profiling-go-programs)
+
+Comments on [Hacker News](https://news.ycombinator.com/item?id=13623031)
