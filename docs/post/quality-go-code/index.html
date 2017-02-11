@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <base href="http://alexandrutopliceanu.ro/">
+    
+
+    <link rel="dns-prefetch" href="//fonts.googleapis.com/">
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Old+Standard+TT:400' rel='stylesheet' type='text/css'>
+
+    <title>
+      
+      
+         quality go code 
+      
+    </title>
+    <link rel="canonical" href="http://alexandrutopliceanu.ro/post/quality-go-code/">
+
+    <style>
+  * {
+    border:0;
+    font:inherit;
+    font-size:100%;
+    vertical-align:baseline;
+    margin:0;
+    padding:0;
+    color: black;
+  }
+
+  body {
+    font-family:'Open Sans', 'Myriad Pro', Myriad, sans-serif;
+    font-size:17px;
+    line-height:160%;
+    color:#1d1313;
+    max-width:700px;
+    margin:auto;
+  }
+
+  p {
+    margin: 5px 0 10px 0;
+  }
+
+  a img {
+    border:none;
+  }
+
+  img {
+    margin: 10px auto 10px auto;
+    max-width: 100%;
+    display: block;
+  }
+
+  pre, code {
+    font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    background-color: #f7f7f7;
+  }
+
+  code {
+    font-size: 12px;
+    padding: 4px;
+  }
+
+  pre {
+    margin-top: 0;
+    margin-bottom: 16px;
+    word-wrap: normal;
+    padding: 16px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+  }
+
+  pre>code {
+    padding: 0;
+    margin: 0;
+    font-size: 100%;
+    word-break: normal;
+    white-space: pre;
+    background: transparent;
+    border: 0;
+  }
+
+  pre code {
+    display: inline;
+    max-width: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    line-height: inherit;
+    word-wrap: normal;
+    background-color: transparent;
+    border: 0;
+  }
+
+  pre code::before,
+  pre code::after {
+    content: normal;
+  }
+
+  em,q,em,dfn {
+    font-style:italic;
+  }
+
+  .sans,html .gist .gist-file .gist-meta {
+    font-family:"Open Sans","Myriad Pro",Myriad,sans-serif;
+  }
+
+  .mono,pre,code,tt,p code,li code {
+    font-family:Menlo,Monaco,"Andale Mono","lucida console","Courier New",monospace;
+  }
+
+  .heading,.serif,h1,h2,h3 {
+    font-family:"Old Standard TT",serif;
+  }
+
+  strong {
+    font-weight:600;
+  }
+
+  q:before {
+    content:"\201C";
+  }
+
+  q:after {
+    content:"\201D";
+  }
+
+  del,s {
+    text-decoration:line-through;
+  }
+
+  blockquote {
+    font-family:"Old Standard TT",serif;
+    text-align:center;
+    padding:50px;
+  }
+
+  blockquote p {
+    display:inline-block;
+    font-style:italic;
+  }
+
+  blockquote:before,blockquote:after {
+    font-family:"Old Standard TT",serif;
+    content:'\201C';
+    font-size:35px;
+    color:#403c3b;
+  }
+
+  blockquote:after {
+    content:'\201D';
+  }
+
+  hr {
+    width:40%;
+    height: 1px;
+    background:#403c3b;
+    margin: 25px auto;
+  }
+
+  h1 {
+    font-size:35px;
+  }
+
+  h2 {
+    font-size:28px;
+  }
+
+  h3 {
+    font-size:22px;
+    margin-top:18px;
+  }
+
+  h1 a,h2 a,h3 a {
+    text-decoration:none;
+  }
+
+  h1,h2 {
+    margin-top:28px;
+  }
+
+  #sub-header, time {
+    color:#403c3b;
+    font-size:13px;
+  }
+
+  #sub-header {
+    margin: 0 4px;
+  }
+
+  #nav h1 a {
+    font-size:35px;
+    color:#1d1313;
+    line-height:120%;
+  }
+
+  .posts_listing a,#nav a {
+    text-decoration: none;
+  }
+
+  li {
+    margin-left: 20px;
+  }
+
+  ul li {
+    margin-left: 5px;
+  }
+
+  ul li {
+    list-style-type: none;
+  }
+  ul li:before {
+    content:"\00BB \0020";
+  }
+
+  #nav ul li:before, .posts_listing li:before {
+    content:'';
+    margin-right:0;
+  }
+
+  #content {
+    text-align:left;
+    width:100%;
+    font-size:15px;
+    padding:60px 0 80px;
+  }
+
+  #content h1,#content h2 {
+    margin-bottom:5px;
+  }
+
+  #content h2 {
+    font-size:25px;
+  }
+
+  #content .entry-content {
+    margin-top:15px;
+  }
+
+  #content time {
+    margin-left:3px;
+  }
+
+  #content h1 {
+    font-size:30px;
+  }
+
+  .highlight {
+    margin: 10px 0;
+  }
+
+  .posts_listing {
+    margin:0 0 50px;
+  }
+
+  .posts_listing li {
+    margin:0 0 25px 15px;
+  }
+
+  .posts_listing li a:hover,#nav a:hover {
+    text-decoration: underline;
+  }
+
+  #nav {
+    text-align:center;
+    position:static;
+    margin-top:60px;
+  }
+
+  #nav ul {
+    display: table;
+    margin: 8px auto 0 auto;
+  }
+
+  #nav li {
+    list-style-type:none;
+    display:table-cell;
+    font-size:15px;
+    padding: 0 20px;
+  }
+
+  #links {
+    margin: 50px 0 0 0;
+  }
+
+  #links :nth-child(2) {
+    float:right;
+  }
+
+  #not-found {
+    text-align: center;
+  }
+
+  #not-found a {
+    font-family:"Old Standard TT",serif;
+    font-size: 200px;
+    text-decoration: none;
+    display: inline-block;
+    padding-top: 225px;
+  }
+
+  @media (max-width: 750px) {
+    body {
+      padding-left:20px;
+      padding-right:20px;
+    }
+
+    #nav h1 a {
+      font-size:28px;
+    }
+
+    #nav li {
+      font-size:13px;
+      padding: 0 15px;
+    }
+
+    #content {
+      margin-top:0;
+      padding-top:50px;
+      font-size:14px;
+    }
+
+    #content h1 {
+      font-size:25px;
+    }
+
+    #content h2 {
+      font-size:22px;
+    }
+
+    .posts_listing li div {
+      font-size:12px;
+    }
+  }
+
+  @media (max-width: 400px) {
+    body {
+      padding-left:20px;
+      padding-right:20px;
+    }
+
+    #nav h1 a {
+      font-size:22px;
+    }
+
+    #nav li {
+      font-size:12px;
+      padding: 0 10px;
+    }
+
+    #content {
+      margin-top:0;
+      padding-top:20px;
+      font-size:12px;
+    }
+
+    #content h1 {
+      font-size:20px;
+    }
+
+    #content h2 {
+      font-size:18px;
+    }
+
+    .posts_listing li div{
+      font-size:12px;
+    }
+  }
+</style>
+
+
+    <link rel="shortcut icon" href="http://alexandrutopliceanu.ro/favicon.ico">
+
+    
+  </head>
+
+  <body>
+    <section id=nav>
+      <h1><a href="http://alexandrutopliceanu.ro/">Alexandru Topliceanu</a></h1>
+      <ul>
+        
+          <li><a href="mailto:alexandru.topliceanu@gmail.com">Email</a></li>
+        
+          <li><a href="https://github.com/topliceanu">Github</a></li>
+        
+          <li><a href="https://twitter.com/topliceanu">Twitter</a></li>
+        
+      </ul>
+    </section>
+
+
+<section id=content>
+  <h1> quality go code </h1>
+
+  <div id=sub-header>
+    February 2017 · 11 minute read
+  </div>
+
+  <div class="entry-content">
+    
+
+<h1 id="quality-golang-code">Quality Golang Code</h1>
+
+<p><em>The tools I use to help produce quality Golang code</em></p>
+
+<h2 id="abstract">Abstract</h2>
+
+<p>Go has excellent libraries for source-code parsing. These have enabled the creators of Go and the open source community to produce a variety of tools which help eliminate errors in advance.</p>
+
+<p>The large number of tools and the lack of documentation on how to best use them presents a problem for engineers.
+This blog post describes the process and the tools I use to improve code quality and catch bugs early in my Go code.
+I will go through linting, testing, code coverage, benchmarking, race detection in concurrent code, memory, CPU and contention profiling.</p>
+
+<h2 id="documentation">Documentation</h2>
+
+<p>An HTML version can be generated dynamically from a package&rsquo;s source code.
+Running <code>godoc -http=:8080</code> will start a static HTTP server on <code>0.0.0.0:8080</code> which will generate on the fly and serve the documentation for all standard library packages as well as all the packages <code>$GOPATH</code>.
+Go to <code>http://0.0.0.0:8080/pkg/github.com/your/package</code> to see the live docs of your package as you are developing it. Make sure you document all your exported members.</p>
+
+<h2 id="linting">Linting</h2>
+
+<p>Code linting is a static analysis technique meant to prevent programmers from doing mistakes commonly seen in a specific language.</p>
+
+<p>A popular project in Go is <a href="https://github.com/alecthomas/gometalinter">go-metalinter</a>. I found it to be too broad. Instead, I use it as a comprehensive list of &ldquo;best practice&rdquo; tools from which I pick only what I need, depending on the project.
+In particular, I use <code>go fmt</code> because it is the standard way to format source code.
+I&rsquo;ve given up on <code>goimport</code> (which also runs <code>go fmt</code>) because I found the rules to be simple enough to enforce: split standard libraries from everything else with an empty line in the <code>import</code> statement, then sort the two batches lexicographically.</p>
+
+<p>I usually use <a href="https://github.com/Masterminds/glide">glide</a> to manage the <code>/vendor</code> folder in a project. With <em>glide</em>, you can run <code>go fmt $(glide novendor)</code> to format all source files except for the ones in <code>/vendor</code>.</p>
+
+<p><code>go vet</code> is another helpful tool detect &ldquo;common&rdquo; Golang mistakes. It works by running a <a href="https://golang.org/cmd/vet/">set of heuristics</a> against the source code and reporting the results. Note that it might return false positives, in the end, it&rsquo;s up to you to decide what is important or not.
+<code>govet</code> expects Go package names as parameters so, to run it on all your project except for vendored dependencies, use <code>go vet $(go list ./... | grep -v /vendor/)</code>.</p>
+
+<p><a href="https://github.com/golang/lint">golint</a> detects and reports coding style mistakes, it does not rewrite the code as <code>go fmt</code> does. It is used internally by Google and it is a good base for your company&rsquo;s internal Go style guide. Use <code>go list ./... | grep -v /vendor/ | xargs -L1 golint</code> to skip the vendored dependencies.</p>
+
+<p>The Go compiler is very diligent to panic when you import a package you don&rsquo;t use or when you define a variable you don&rsquo;t use, but it doesn&rsquo;t complain when you forget to handle the error returned by a function. For that, I use [errcheck]((<a href="https://github.com/kisielk/errcheck">https://github.com/kisielk/errcheck</a>) and I find it invaluable.</p>
+
+<h2 id="testing">Testing</h2>
+
+<p>Much ink has been spilled on how to test code and, in particular, Go code. I am not going to go into details here, but do check out the excellent <a href="https://godoc.org/testing">testing package docs</a>.</p>
+
+<p>When developing a service from scratch, I usually start with acceptance tests. It&rsquo;s important to get them right because they help define the API and are going to be used for the whole lifetime of the project.
+When the API protocol matures, I move down to integration and unit tests, often accompanied by redesigns and rewrites of the implementation.</p>
+
+<p>To ensure that tests only run against the public API of a module, I group tests in a <code>&lt;module&gt;_test</code> package which has the added benefit of helping define a testable API, enforces dependency injection, component orthogonality, and single responsibility.</p>
+
+<p>I find testing to be hard! It requires design and maintenance and should not be considered second-class citizen to production code. It usually takes more time to write tests and significantly more code, but I consider this to be the norm and a mark of craftsmanship.</p>
+
+<p>To run a specific test in your suite, use <code>go test -run=&lt;regexp/matching/test/func/name&gt;</code>.</p>
+
+<h2 id="benchmarking">Benchmarking</h2>
+
+<p>Go has inbuilt support for micro-benchmarks. These are similar to unit tests, that is benchmarks measure the performance (time and memory allocations) of individual functions.
+The way this works is that the body of the benchmark is executed enough times to get a statistically relevant measurement of its duration. One word of warning, different runs of the same benchmark function might yield significantly different results if run inside VMs or containers, especially on laptops which perform various power saving and cooling functions. See this <a href="http://thornydev.blogspot.co.uk/2015/07/an-exercise-in-profiling-go-program.html">blog post</a> on the performance gains attainable.</p>
+
+<p>The Go benchmark framework is part of the <a href="https://godoc.org/testing">testing</a> package. All benchmarks are executed sequentially, but you can run them in parallel with the <code>RunParallel</code> helper function. This will create multiple goroutines and equally distribute the benchmark iterations amongst them. It&rsquo;s also very effective at detecting race conditions and measuring lock contention.</p>
+
+<p>For some reason, tests are executed by default when running benchmarks so, to ignore the tests, run <code>go test -run=^$ -bench=.</code>.</p>
+
+<h2 id="race-detection">Race Detection</h2>
+
+<p><a href="https://golang.org/doc/articles/race_detector.html">Race detection</a> is integrated into the Go compiler and is available for <code>go test -race</code>, <code>go run -race</code>, <code>go build -race</code> and <code>go install -race</code>.</p>
+
+<p>It works by instrumenting every memory access such that when two goroutines read from/write to the same memory address, the program panics. Because of this design, data races can only be detected at runtime and only on code paths that are executed. This <a href="https://github.com/google/sanitizers/wiki/ThreadSanitizerAlgorithm">document</a> describes how the instrumentation algorithm works in detail.</p>
+
+<p>The best way to detect data races is under realistic production conditions but this approach has a significant performance penalty. Running one instrumented binary in parallel with other non-instrumented binaries in a load-balanced set is a useful approach, especially for alpha stage services.</p>
+
+<p>Other ways to detect races are:
+- running parallel benchmarks with the <code>-race</code> flag can catch races with the right test cases.
+- running parallel tests. Go doesn&rsquo;t offer inbuilt support for parallel tests, so you will have to write the framework to do that yourself. In <a href="https://github.com/bradfitz/talk-yapc-asia-2015/blob/master/talk.md#race-detector">this example</a> by Brad Fitzpatrick, multiple goroutines perform the same action under test and a data race is detected.
+- another very good alternative is to run load tests: produce a high volume of requests against your race instrumented binary running in a staging or testing environment. For HTTP services I prefer to use  <a href="http://github.com/tsenart/vegeta">vegeta</a> to perform load testing.</p>
+
+<p>Typical race conditions are accidentally shared variables, global variables accessed from multiple goroutines, etc. See this documentation article on <a href="https://golang.org/doc/articles/race_detector.html#Typical_Data_Races">tipical data race situations</a>. Fixing these cases requires the use of synchronization primitives, such as those available in the <code>sync</code> packages or channels to pass control to memory spaces.</p>
+
+<p>One thing to note is that because of Go&rsquo;s memory model, not even read/writes on primitive data types are <em>not</em> atomic. The <code>sync/atomic</code> package has operations to perform atomic reads, atomic writes and atomic “compare and swaps” on ints and pointers.</p>
+
+<h2 id="profiling">Profiling</h2>
+
+<p>Profiling is also built-in with the Go tools. All types of profilers work in a similar way. An instrumented binary will spawn a separate thread which will send a signal to the main thread at a set interval. That signal will prompt the main thread to respond with data depending on the type of profiling done. The profile thread collects all this data and produces a profile report in binary format, essentially a collection of <a href="https://developers.google.com/protocol-buffers/">protobuf objects</a>, which you can save to disk for analysis using the <code>pprof</code> tool.</p>
+
+<p>All profilers are based on sampling, that is they collect data every set period of time, then aggregate it:
+- CPU profiling is useful for detecting slow running functions. It works by collecting stack traces of all currently running goroutines at a high frequency, then cumulating the times spent in each function on the stack. Very fast or infrequently called functions are discarded.
+- Memory profiling is useful to detect functions which allocate relatively large chunks memory.  It works by collecting heap dumps from each running goroutine at high frequency and diffing sequential heap snapshots to count allocations. High memory consumption negatively affects performance because it means Go&rsquo;s &ldquo;stop-the-world&rdquo; garbage collector has more work to do.
+- Block profiling is used to detect lock contention between multiple goroutines and is done by recording when and where each goroutine is blocking.</p>
+
+<p>There are multiple ways to produce profiles.</p>
+
+<h3 id="compiling-an-instrumented-binary">Compiling an instrumented binary</h3>
+
+<p>For CPU profiling, you need to use the <a href="https://godoc.org/runtime/pprof">runtime/pprof</a> package. Here&rsquo;s an example of how you might instrument your <code>func main()</code>:</p>
+
+<pre><code class="language-go">fp = os.Create(profilePath)
+defer fp.Close()
+pprof.StartCPUProfile(fp) // start collecting data.
+defer pprof.StopCPUProfile() // when the process stops, stop the profiler and store the data.
+</code></pre>
+
+<p>For memory profiling, you need the <a href="https://godoc.org/runtime">runtime</a> and <a href="https://godoc.org/runtime/pprof">runtime/pprof</a> packages.</p>
+
+<pre><code class="language-go">fp = os.Create(profilePath)
+defer fp.Close()
+runtime.GC() // trigger a run of the GC to get a clean heap snapshot.
+defer pprof.WriteHeapProfile(fp) // when the process stops, stop the profiler and store the data.
+</code></pre>
+
+<p>For block profiling, you must use the <a href="https://godoc.org/runtime">runtime</a> package. See <a href="https://github.com/golang/go/issues/14689">this GitHub issue</a> on how to build a block profile.</p>
+
+<pre><code class="language-go">fp = os.Create(profilePath)
+defer fp.Close()
+runtime.SetBlockProfileRate(1) // catch every single block event.
+profile = pprof.Lookup(&quot;block&quot;) // fetch the block profile singleton.
+defer profile.WriteTo(fp) // write the profile data before stopping the process.
+</code></pre>
+
+<p>A couple of observations: first, errors are not being handled in the code above for simplicity reasons, you should definitely do so in your own code; second, the defer statements might not execute, depending on how your program stops, this will lead to the profile information not being transferred from memory to disk.</p>
+
+<h3 id="instrument-tests-and-benchmarks">Instrument tests and benchmarks</h3>
+
+<p><code>go test</code> allows you to pass <code>-cpuprofile=&lt;path/to/store/profile&gt;</code>, <code>-memprofile=&lt;path/to/store/profile&gt;</code> or <code>-blockprofile=&lt;path/to/store/profile&gt;</code> params. These options will build a test or benchmark binary instrumented for the specific profiler, run it and store the profiler report in the specified path at the end of the tests.
+This method has the disadvantage that the profile report will contain data on the testing infrastructure which might have significant overhead.</p>
+
+<h3 id="instrument-http-servers">Instrument HTTP servers</h3>
+
+<p>For HTTP services, the <code>net/http/pprof</code> package can be imported to produce profiles on demand. It works by registering a <code>/debug/pprof</code> path on the default <code>net/http</code> handler (you can also add it to custom HTTP handlers) which lists all the profiles it can produce.</p>
+
+<p>You may want to protect this URL with an authentication mechanism, profiling will significantly decrease the performance of your service and could potentially be used in a DOS attack.
+When a specific profile path is requested, say <code>/debug/pprof/profile</code>, the package starts profiling and writes the output on the HTTP stream to the client.
+The <code>pprof</code> tool can be used to consume the profile stream from an URL directly, but you can also download the profile locally.</p>
+
+<h3 id="how-to-read-a-profile">How to read a profile</h3>
+
+<p>The main way to use the profile data is with the built-in <code>pprof</code> tool. This is based on the <a href="https://github.com/google/pprof">google/pprof</a> project and is now bundled into the Go binary:</p>
+
+<pre><code class="language-bash">go tool pprof [&lt;path/to/binary&gt;] &lt;path/to/profile&gt;
+pprof&gt; ...
+</code></pre>
+
+<p>This command will start a <code>pprof</code> session, which loads up all the profile data and exposes several useful commands:
+- <code>top &lt;N&gt; -cum</code> lists the top N functions, sorted such that the top listed function consumes the most CPU or memory or has the longest lock times, depending on profile under inspection.
+- <code>list &lt;function&gt;</code> lists the source code of a function and the lines that are the biggest contributors to resource consumption. You can specify a package name as a prefix to further filter the results. This command needs the binary file to be passed to the <code>pprof</code> tool in order to produce source code listings.
+- <code>web</code> opens a browser window containing an SVG image of the execution graph for the profiled program and the time spent or memory consumed in each call. Note that the graph is pruned, only the top offenders are displayed!
+Usually, you start with <code>top</code> to find suspicious functions then dig deeper with <code>list</code>. <a href="https://github.com/bradfitz/talk-yapc-asia-2015/blob/master/talk.md#cpu-profiling">This</a> is an example of how the output of these commands looks like.</p>
+
+<p>When analyzing a memory profile with <code>pprof</code>, make sure to add the <code>-alloc_space</code> flag which displays allocated memory sizes, it will make <code>list</code> better.</p>
+
+<p>For CPU profiles, a helpful tool I use is <a href="https://github.com/uber/go-torch">go-torch</a>. It works by generating a flame graph, using <a href="https://github.com/brendangregg/FlameGraph">brendangregg/FlameGraph</a> from a profile binary. To produce a flame graph SVG run <code>go-torch &lt;binary&gt; &lt;profile&gt;</code>, then open it in a browser window.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Discovering these tools, understanding how they work, how to configure and use them is hard work! Once you have them in place, you still don&rsquo;t get a free lunch, often times you need to understand the design decisions in the language implementation, the standard library, or in the third party libraries you are using. The standard library, in particular, has a lot of helper functions which boost productivity but are seldom efficient compared to their low-level counterparts.
+That being said, the level of insight you can get into Go programs with just the built-in tools is impressive and the ecosystem around the language nicely complements its native capabilities.</p>
+
+<h2 id="resources">Resources</h2>
+
+<ol>
+<li>Brad Fitzpatrick&rsquo;s YAPC 2015 talk &ldquo;Profiling and Optimizing Go&rdquo; <a href="https://www.youtube.com/watch?v=xxDZuPEgbBU">youtube.com</a>, <a href="https://docs.google.com/presentation/d/1lL7Wlh9GBtTSieqHGJ5AUd1XVYR48UPhEloVem-79mA/view#slide=id.p">slides</a> and <a href="https://github.com/bradfitz/talk-yapc-asia-2015/blob/master/talk.md">writeup</a></li>
+<li>Francisc Campoy&rsquo;s &ldquo;Go tooling in Action&rdquo; <a href="https://www.youtube.com/watch?v=uBjoTxosSys">youtube.com</a></li>
+<li>Michael Peterson&rsquo;s &ldquo;An Exercise in Profiling a Go Program&rdquo; <a href="http://thornydev.blogspot.co.uk/2015/07/an-exercise-in-profiling-go-program.html">link</a></li>
+<li>Not updated but still good, Golang&rsquo;s blog post &ldquo;Profiling Go Programs&rdquo; <a href="https://blog.golang.org/profiling-go-programs">link</a></li>
+</ol>
+
+  </div>
+
+  <div id=links>
+    
+      <a class="basic-alignment left" href="http://alexandrutopliceanu.ro/post/graphql-with-go-and-postgresql/">&laquo; graphql with go and postgresql</a>
+    
+    
+  </div>
+</section>
+
+  </div>
+  
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-24987736-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+</body>
+</html>
+
+
+
