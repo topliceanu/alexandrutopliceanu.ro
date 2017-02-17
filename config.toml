@@ -20,3 +20,6 @@ theme = "black-and-light"
 [[menu.main]]
   name = "Email"
   url  = "mailto:alexandru.topliceanu@gmail.com"
+[[menu.main]]
+  name = "Subscribe"
+  url  = "http://eepurl.com/cCDKev"
