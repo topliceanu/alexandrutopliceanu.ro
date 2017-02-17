@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-	<meta name="generator" content="Hugo 0.18" />
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="HandheldFriendly" content="True">
@@ -19,10 +18,10 @@
     <title>
       
       
-         alexandru topliceanu 
+         [talk] introduction to graphql 
       
     </title>
-    <link rel="canonical" href="http://alexandrutopliceanu.ro/">
+    <link rel="canonical" href="http://alexandrutopliceanu.ro/post/introduction-to-graphql/">
 
     <style>
   * {
@@ -380,8 +379,6 @@
     <link rel="shortcut icon" href="http://alexandrutopliceanu.ro/favicon.ico">
 
     
-      <link href="http://alexandrutopliceanu.ro/index.xml" rel="alternate" type="application/rss+xml" title="alexandru topliceanu" />
-    
   </head>
 
   <body>
@@ -402,30 +399,67 @@
 
 
 <section id=content>
-  <ul class=posts_listing>
+  <h1> [talk] introduction to graphql </h1>
+
+  <div id=sub-header>
+    February 2017 · 2 minute read
+  </div>
+
+  <div class="entry-content">
     
-      <li>
-        <h2><a href="http://alexandrutopliceanu.ro/post/introduction-to-graphql/">[talk] introduction to graphql</a></h2>
-        <div id=date>
-          <time>February 2017</time>
-        </div>
-      </li>
+
+<h1 id="introduction-to-graphql">Introduction to GraphQL</h1>
+
+<ul>
+<li>short introductory talk on GraphQL I gave at Pusher Ltd. (where I also work)</li>
+<li>here are my slide notes
+
+<ul>
+<li>Motivation</li>
+<li>I built an API for a personal project =&gt; <a href="http://alexandrutopliceanu.ro/post/graphql-with-go-and-postgresql/">wrote a blog post (Graphql + Golang + SQL)</a> =&gt; internal brainstorming session =&gt; this presentation!</li>
+<li>It&rsquo;s an IDL, Interface Description/Definition Language.</li>
+<li>you define a schema containing data type and actions on those data types.</li>
+<li>app level protocol (processes on different platforms talking to each other)</li>
+<li>think Swagger, Thrift, Protobuf, etc.</li>
+<li>optimizes on the number of network requests and the size of these requests</li>
+<li>Why the name GraphQL?</li>
+<li>it models data as a graph: types of vertices, edges are modeled as attributes.
+
+<ul>
+<li>flexible, few constraints, but more work for the API designer.</li>
+</ul></li>
+<li>querying is equivalent to graph traversal</li>
+<li>Example: a blog post page</li>
+<li>why this and not a todo list? because it&rsquo;s common but not <em>that</em> trivial.</li>
+<li>vertex types: user, post, comments</li>
+<li>disadvantages of using (pure) REST: lots of request, fetch data that is not needed, high latency</li>
+<li>GraphQL querying is the same as traversal.</li>
+<li>usually one POST endpoint (both query, mutation, subscription)</li>
+<li>Disadvantages</li>
+<li>moves complexity from the client to the server. I would argue that the client is not substantially simpler after all.</li>
+<li>how do you translate to your storage device?
+
+<ul>
+<li>graph storage is an option but not efficient.</li>
+</ul></li>
+<li>it&rsquo;s not seeing adoption.</li>
+</ul></li>
+</ul>
+
+
+<div style="position: relative; padding-bottom: 56.25%; padding-top: 30px; height: 0; overflow: hidden;">
+  <iframe src="//www.youtube.com/embed/CbxR6LC_o0M?autoplay=1" 
+  style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" allowfullscreen frameborder="0"></iframe>
+</div>
+
+  </div>
+
+  <div id=links>
     
-      <li>
-        <h2><a href="http://alexandrutopliceanu.ro/post/quality-go-code/">quality go code</a></h2>
-        <div id=date>
-          <time>February 2017</time>
-        </div>
-      </li>
+      <a class="basic-alignment left" href="http://alexandrutopliceanu.ro/post/quality-go-code/">&laquo; quality go code</a>
     
-      <li>
-        <h2><a href="http://alexandrutopliceanu.ro/post/graphql-with-go-and-postgresql/">graphql with go and postgresql</a></h2>
-        <div id=date>
-          <time>January 2017</time>
-        </div>
-      </li>
     
-  </ul>
+  </div>
 </section>
 
   </div>
@@ -439,5 +473,6 @@ ga('send', 'pageview');
 
 </body>
 </html>
+
 
 

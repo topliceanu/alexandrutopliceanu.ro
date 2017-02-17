@@ -4,7 +4,6 @@ canonifyurls = true
 googleAnalytics = "UA-24987736-1"
 languageCode = "en-us"
 publishDir = "docs"
-#pygmentsCodeFencesGuessSyntax = true
 pygmentsstyle = "bw"
 title = "alexandru topliceanu"
 theme = "black-and-light"
