@@ -6,8 +6,30 @@
     <description>Recent content in Posts on alexandru topliceanu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 11 Feb 2017 15:16:45 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 17 Feb 2017 23:17:08 +0000</lastBuildDate>
     <atom:link href="http://alexandrutopliceanu.ro/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>[video] introduction to graphql</title>
+      <link>http://alexandrutopliceanu.ro/post/introduction-to-graphql/</link>
+      <pubDate>Fri, 17 Feb 2017 23:17:08 +0000</pubDate>
+      
+      <guid>http://alexandrutopliceanu.ro/post/introduction-to-graphql/</guid>
+      <description>
+
+&lt;h1 id=&#34;introduction-to-graphql&#34;&gt;Introduction to GraphQL&lt;/h1&gt;
+
+&lt;p&gt;This post embeds a recorded presentation I gave at the offices of &lt;a href=&#34;https://pusher.com&#34;&gt;Pusher&lt;/a&gt; where I currently work.&lt;/p&gt;
+
+&lt;p&gt;The talk is a short introduction on GraphQL. My goal here is to describe how GraphQL works, how it positions against similar approaches and to give an example of how one might use it to design an API for a blog engine. If you want more details about that process I previously wrote a blog post &lt;a href=&#34;http://alexandrutopliceanu.ro/post/graphql-with-go-and-postgresql/&#34;&gt;GraphQL with Go and PostgreSQL&lt;/a&gt; and an implementation at &lt;a href=&#34;https://github.com/topliceanu/graphql-go-example&#34;&gt;github.com/topliceanu/graphql-go-example&lt;/a&gt;&lt;/p&gt;
+
+
+&lt;div style=&#34;position: relative; padding-bottom: 56.25%; padding-top: 30px; height: 0; overflow: hidden;&#34;&gt;
+  &lt;iframe src=&#34;//www.youtube.com/embed/CbxR6LC_o0M&#34; style=&#34;position: absolute; top: 0; left: 0; width: 100%; height: 100%;&#34; allowfullscreen frameborder=&#34;0&#34;&gt;&lt;/iframe&gt;
+ &lt;/div&gt;
+
+</description>
+    </item>
     
     <item>
       <title>quality go code</title>
