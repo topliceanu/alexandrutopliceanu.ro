@@ -10,7 +10,7 @@
     <atom:link href="http://alexandrutopliceanu.ro/post/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>[talk] introduction to graphql</title>
+      <title>[video] introduction to graphql</title>
       <link>http://alexandrutopliceanu.ro/post/introduction-to-graphql/</link>
       <pubDate>Fri, 17 Feb 2017 23:17:08 +0000</pubDate>
       
@@ -19,47 +19,15 @@
 
 &lt;h1 id=&#34;introduction-to-graphql&#34;&gt;Introduction to GraphQL&lt;/h1&gt;
 
-&lt;ul&gt;
-&lt;li&gt;short introductory talk on GraphQL I gave at Pusher Ltd. (where I also work)&lt;/li&gt;
-&lt;li&gt;here are my slide notes
+&lt;p&gt;This post embeds a recorded presentation I gave at the offices of &lt;a href=&#34;https://pusher.com&#34;&gt;Pusher&lt;/a&gt; where I currently work.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;Motivation&lt;/li&gt;
-&lt;li&gt;I built an API for a personal project =&amp;gt; &lt;a href=&#34;http://alexandrutopliceanu.ro/post/graphql-with-go-and-postgresql/&#34;&gt;wrote a blog post (Graphql + Golang + SQL)&lt;/a&gt; =&amp;gt; internal brainstorming session =&amp;gt; this presentation!&lt;/li&gt;
-&lt;li&gt;It&amp;rsquo;s an IDL, Interface Description/Definition Language.&lt;/li&gt;
-&lt;li&gt;you define a schema containing data type and actions on those data types.&lt;/li&gt;
-&lt;li&gt;app level protocol (processes on different platforms talking to each other)&lt;/li&gt;
-&lt;li&gt;think Swagger, Thrift, Protobuf, etc.&lt;/li&gt;
-&lt;li&gt;optimizes on the number of network requests and the size of these requests&lt;/li&gt;
-&lt;li&gt;Why the name GraphQL?&lt;/li&gt;
-&lt;li&gt;it models data as a graph: types of vertices, edges are modeled as attributes.
-
-&lt;ul&gt;
-&lt;li&gt;flexible, few constraints, but more work for the API designer.&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;querying is equivalent to graph traversal&lt;/li&gt;
-&lt;li&gt;Example: a blog post page&lt;/li&gt;
-&lt;li&gt;why this and not a todo list? because it&amp;rsquo;s common but not &lt;em&gt;that&lt;/em&gt; trivial.&lt;/li&gt;
-&lt;li&gt;vertex types: user, post, comments&lt;/li&gt;
-&lt;li&gt;disadvantages of using (pure) REST: lots of request, fetch data that is not needed, high latency&lt;/li&gt;
-&lt;li&gt;GraphQL querying is the same as traversal.&lt;/li&gt;
-&lt;li&gt;usually one POST endpoint (both query, mutation, subscription)&lt;/li&gt;
-&lt;li&gt;Disadvantages&lt;/li&gt;
-&lt;li&gt;moves complexity from the client to the server. I would argue that the client is not substantially simpler after all.&lt;/li&gt;
-&lt;li&gt;how do you translate to your storage device?
-
-&lt;ul&gt;
-&lt;li&gt;graph storage is an option but not efficient.&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;it&amp;rsquo;s not seeing adoption.&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;The talk is a short introduction on GraphQL. My goal here is to describe how GraphQL works, how it positions against similar approaches and to give an example of how one might use it to design an API for a blog engine. If you want more details about that process I previously wrote a blog post &lt;a href=&#34;http://alexandrutopliceanu.ro/post/graphql-with-go-and-postgresql/&#34;&gt;GraphQL with Go and PostgreSQL&lt;/a&gt; and an implementation at &lt;a href=&#34;https://github.com/topliceanu/graphql-go-example&#34;&gt;github.com/topliceanu/graphql-go-example&lt;/a&gt;&lt;/p&gt;
 
 
 &lt;div style=&#34;position: relative; padding-bottom: 56.25%; padding-top: 30px; height: 0; overflow: hidden;&#34;&gt;
-  &lt;iframe src=&#34;//www.youtube.com/embed/CbxR6LC_o0M?autoplay=1&#34; 
-  style=&#34;position: absolute; top: 0; left: 0; width: 100%; height: 100%;&#34; allowfullscreen frameborder=&#34;0&#34;&gt;&lt;/iframe&gt;
-&lt;/div&gt;
+  &lt;iframe src=&#34;//www.youtube.com/embed/CbxR6LC_o0M&#34; style=&#34;position: absolute; top: 0; left: 0; width: 100%; height: 100%;&#34; allowfullscreen frameborder=&#34;0&#34;&gt;&lt;/iframe&gt;
+ &lt;/div&gt;
+
 </description>
     </item>
     
