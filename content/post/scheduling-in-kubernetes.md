@@ -197,7 +197,9 @@ deployment in k8s, where it is managed by the default scheduler. A custom schedu
 let's say it is called `my-scheduler`, will pick up all the pods which have
 `"schedulerName": "my-scheduler"` in their object spec.
 
-You can learn more about this operation in these two blog posts: here and here.
+You can learn more about this operation in these two blog posts:
+[here](http://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html)
+and [here](https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/).
 
 A question whose answer is not clear immediately from the code is how do multiple
 schedulers coordinate. A scheduler needs to know which resources it has available
