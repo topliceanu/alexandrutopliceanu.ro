@@ -557,9 +557,12 @@ curl -XPOST http://vm:8080/graphql -d '{user(id:1){post(id:2){user{id,email}}}}'
 
 <h2 id="designing-the-postgresql-database">Designing the PostgreSQL database</h2>
 
-<p>The relational database design is, as usual, driven by the need to avoid data duplication. This approach was chosen for two reasons:
- 1. to show that there is no need for a specialized database technology or to learn and use new design techniques to accommodate a GraphQL API.
- 2. to show that a GraphQL API can still be created on top of existing databases, more specifically databases originally designed to power REST endpoints or even traditional server-side rendered HTML websites.</p>
+<p>The relational database design is, as usual, driven by the need to avoid data duplication. This approach was chosen for two reasons:</p>
+
+<ol>
+<li>to show that there is no need for a specialized database technology or to learn and use new design techniques to accommodate a GraphQL API.</li>
+<li>to show that a GraphQL API can still be created on top of existing databases, more specifically databases originally designed to power REST endpoints or even traditional server-side rendered HTML websites.</li>
+</ol>
 
 <p>See <em>Appendix 1</em> for a discussion on differences between relational and graph databases with respect to building a GraphQL API. <em>Listing 3</em> shows the SQL commands to create the new database. The database schema generally matches the GraphQL schema. The <code>followers</code> relation needed to be added to support the <code>follow/unfollow</code> mutations.</p>
 
