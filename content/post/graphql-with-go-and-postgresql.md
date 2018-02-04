@@ -1,11 +1,10 @@
 +++
+title = "GraphQL With Golang and PostgreSQL"
 date = "2017-01-22T08:28:53Z"
-title = "graphql with go and postgresql"
 draft = false
-
 +++
 
-# GraphQL In Use: Building a Blogging Engine API with Golang and PostgreSQL
+_Building a Blogging Engine API with Golang and PostgreSQL_
 
 ## Abstract
 
@@ -37,6 +36,7 @@ The structure of this document is the following:
 * in part four we compare the task of rendering a blog post page from the perspective of fetching the needed data from the backend.
 
 ## Related
+
 - The excellent [GraphQL introduction document](http://graphql.org/learn/).
 - The complete and working code for this project is on [github.com/topliceanu/graphql-go-example](https://github.com/topliceanu/graphql-go-example).
 
@@ -146,6 +146,7 @@ By carefully desiging the mutations and type attributes, powerful and expressive
 ## Designing the PostgreSQL database
 
 The relational database design is, as usual, driven by the need to avoid data duplication. This approach was chosen for two reasons:
+
  1. to show that there is no need for a specialized database technology or to learn and use new design techniques to accommodate a GraphQL API.
  2. to show that a GraphQL API can still be created on top of existing databases, more specifically databases originally designed to power REST endpoints or even traditional server-side rendered HTML websites.
 

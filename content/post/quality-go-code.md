@@ -1,11 +1,10 @@
 +++
+title = "Writing Quality Golang Code"
 date = "2017-02-11T15:16:45Z"
-title = "quality go code"
 draft = false
 
 +++
 
-# Quality Golang Code
 _The tools I use to help produce quality Golang code_
 
 ## Abstract
@@ -70,6 +69,7 @@ It works by instrumenting every memory access such that when two goroutines read
 The best way to detect data races is under realistic production conditions but this approach has a significant performance penalty. Running one instrumented binary in parallel with other non-instrumented binaries in a load-balanced set is a useful approach, especially for alpha stage services.
 
 Other ways to detect races are:
+
 - running parallel benchmarks with the `-race` flag can catch races with the right test cases.
 - running parallel tests. Go doesn't offer inbuilt support for parallel tests, so you will have to write the framework to do that yourself. In [this example](https://github.com/bradfitz/talk-yapc-asia-2015/blob/master/talk.md#race-detector) by Brad Fitzpatrick, multiple goroutines perform the same action under test and a data race is detected.
 - another very good alternative is to run load tests: produce a high volume of requests against your race instrumented binary running in a staging or testing environment. For HTTP services I prefer to use  [vegeta](http://github.com/tsenart/vegeta) to perform load testing.
@@ -83,6 +83,7 @@ One thing to note is that because of Go's memory model, not even read/writes on 
 Profiling is also built-in with the Go tools. All types of profilers work in a similar way. An instrumented binary will spawn a separate thread which will send a signal to the main thread at a set interval. That signal will prompt the main thread to respond with data depending on the type of profiling done. The profile thread collects all this data and produces a profile report in binary format, essentially a collection of [protobuf objects](https://developers.google.com/protocol-buffers/), which you can save to disk for analysis using the `pprof` tool.
 
 All profilers are based on sampling, that is they collect data every set period of time, then aggregate it:
+
 - CPU profiling is useful for detecting slow running functions. It works by collecting stack traces of all currently running goroutines at a high frequency, then cumulating the times spent in each function on the stack. Very fast or infrequently called functions are discarded.
 - Memory profiling is useful to detect functions which allocate relatively large chunks memory.  It works by collecting heap dumps from each running goroutine at high frequency and diffing sequential heap snapshots to count allocations. High memory consumption negatively affects performance because it means Go's "stop-the-world" garbage collector has more work to do.
 - Block profiling is used to detect lock contention between multiple goroutines and is done by recording when and where each goroutine is blocking.
@@ -144,9 +145,11 @@ pprof> ...
 ```
 
 This command will start a `pprof` session, which loads up all the profile data and exposes several useful commands:
+
 - `top <N> -cum` lists the top N functions, sorted such that the top listed function consumes the most CPU or memory or has the longest lock times, depending on profile under inspection.
 - `list <function>` lists the source code of a function and the lines that are the biggest contributors to resource consumption. You can specify a package name as a prefix to further filter the results. This command needs the binary file to be passed to the `pprof` tool in order to produce source code listings.
 - `web` opens a browser window containing an SVG image of the execution graph for the profiled program and the time spent or memory consumed in each call. Note that the graph is pruned, only the top offenders are displayed!
+
 Usually, you start with `top` to find suspicious functions then dig deeper with `list`. [This](https://github.com/bradfitz/talk-yapc-asia-2015/blob/master/talk.md#cpu-profiling) is an example of how the output of these commands looks like.
 
 When analyzing a memory profile with `pprof`, make sure to add the `-alloc_space` flag which displays allocated memory sizes, it will make `list` better.
@@ -159,6 +162,7 @@ Discovering these tools, understanding how they work, how to configure and use t
 That being said, the level of insight you can get into Go programs with just the built-in tools is impressive and the ecosystem around the language nicely complements its native capabilities.
 
 ## Resources
+
 1. Brad Fitzpatrick's YAPC 2015 talk "Profiling and Optimizing Go" [youtube.com](https://www.youtube.com/watch?v=xxDZuPEgbBU), [slides](https://docs.google.com/presentation/d/1lL7Wlh9GBtTSieqHGJ5AUd1XVYR48UPhEloVem-79mA/view#slide=id.p) and [writeup](https://github.com/bradfitz/talk-yapc-asia-2015/blob/master/talk.md)
 2. Francisc Campoy's "Go tooling in Action" [youtube.com](https://www.youtube.com/watch?v=uBjoTxosSys)
 3. Michael Peterson's "An Exercise in Profiling a Go Program" [link](http://thornydev.blogspot.co.uk/2015/07/an-exercise-in-profiling-go-program.html)

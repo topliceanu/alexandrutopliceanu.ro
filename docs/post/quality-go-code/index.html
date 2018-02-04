@@ -18,7 +18,7 @@
     <title>
       
       
-         quality go code 
+         Writing Quality Golang Code 
       
     </title>
     <link rel="canonical" href="http://alexandrutopliceanu.ro/post/quality-go-code/">
@@ -399,7 +399,7 @@
 
 
 <section id=content>
-  <h1> quality go code </h1>
+  <h1> Writing Quality Golang Code </h1>
 
   <div id=sub-header>
     February 2017 · 11 minute read
@@ -407,8 +407,6 @@
 
   <div class="entry-content">
     
-
-<h1 id="quality-golang-code">Quality Golang Code</h1>
 
 <p><em>The tools I use to help produce quality Golang code</em></p>
 
@@ -473,10 +471,13 @@ The way this works is that the body of the benchmark is executed enough times to
 
 <p>The best way to detect data races is under realistic production conditions but this approach has a significant performance penalty. Running one instrumented binary in parallel with other non-instrumented binaries in a load-balanced set is a useful approach, especially for alpha stage services.</p>
 
-<p>Other ways to detect races are:
-- running parallel benchmarks with the <code>-race</code> flag can catch races with the right test cases.
-- running parallel tests. Go doesn&rsquo;t offer inbuilt support for parallel tests, so you will have to write the framework to do that yourself. In <a href="https://github.com/bradfitz/talk-yapc-asia-2015/blob/master/talk.md#race-detector">this example</a> by Brad Fitzpatrick, multiple goroutines perform the same action under test and a data race is detected.
-- another very good alternative is to run load tests: produce a high volume of requests against your race instrumented binary running in a staging or testing environment. For HTTP services I prefer to use  <a href="http://github.com/tsenart/vegeta">vegeta</a> to perform load testing.</p>
+<p>Other ways to detect races are:</p>
+
+<ul>
+<li>running parallel benchmarks with the <code>-race</code> flag can catch races with the right test cases.</li>
+<li>running parallel tests. Go doesn&rsquo;t offer inbuilt support for parallel tests, so you will have to write the framework to do that yourself. In <a href="https://github.com/bradfitz/talk-yapc-asia-2015/blob/master/talk.md#race-detector">this example</a> by Brad Fitzpatrick, multiple goroutines perform the same action under test and a data race is detected.</li>
+<li>another very good alternative is to run load tests: produce a high volume of requests against your race instrumented binary running in a staging or testing environment. For HTTP services I prefer to use  <a href="http://github.com/tsenart/vegeta">vegeta</a> to perform load testing.</li>
+</ul>
 
 <p>Typical race conditions are accidentally shared variables, global variables accessed from multiple goroutines, etc. See this documentation article on <a href="https://golang.org/doc/articles/race_detector.html#Typical_Data_Races">tipical data race situations</a>. Fixing these cases requires the use of synchronization primitives, such as those available in the <code>sync</code> packages or channels to pass control to memory spaces.</p>
 
@@ -486,10 +487,13 @@ The way this works is that the body of the benchmark is executed enough times to
 
 <p>Profiling is also built-in with the Go tools. All types of profilers work in a similar way. An instrumented binary will spawn a separate thread which will send a signal to the main thread at a set interval. That signal will prompt the main thread to respond with data depending on the type of profiling done. The profile thread collects all this data and produces a profile report in binary format, essentially a collection of <a href="https://developers.google.com/protocol-buffers/">protobuf objects</a>, which you can save to disk for analysis using the <code>pprof</code> tool.</p>
 
-<p>All profilers are based on sampling, that is they collect data every set period of time, then aggregate it:
-- CPU profiling is useful for detecting slow running functions. It works by collecting stack traces of all currently running goroutines at a high frequency, then cumulating the times spent in each function on the stack. Very fast or infrequently called functions are discarded.
-- Memory profiling is useful to detect functions which allocate relatively large chunks memory.  It works by collecting heap dumps from each running goroutine at high frequency and diffing sequential heap snapshots to count allocations. High memory consumption negatively affects performance because it means Go&rsquo;s &ldquo;stop-the-world&rdquo; garbage collector has more work to do.
-- Block profiling is used to detect lock contention between multiple goroutines and is done by recording when and where each goroutine is blocking.</p>
+<p>All profilers are based on sampling, that is they collect data every set period of time, then aggregate it:</p>
+
+<ul>
+<li>CPU profiling is useful for detecting slow running functions. It works by collecting stack traces of all currently running goroutines at a high frequency, then cumulating the times spent in each function on the stack. Very fast or infrequently called functions are discarded.</li>
+<li>Memory profiling is useful to detect functions which allocate relatively large chunks memory.  It works by collecting heap dumps from each running goroutine at high frequency and diffing sequential heap snapshots to count allocations. High memory consumption negatively affects performance because it means Go&rsquo;s &ldquo;stop-the-world&rdquo; garbage collector has more work to do.</li>
+<li>Block profiling is used to detect lock contention between multiple goroutines and is done by recording when and where each goroutine is blocking.</li>
+</ul>
 
 <p>There are multiple ways to produce profiles.</p>
 
@@ -543,11 +547,15 @@ The <code>pprof</code> tool can be used to consume the profile stream from an UR
 pprof&gt; ...
 </code></pre>
 
-<p>This command will start a <code>pprof</code> session, which loads up all the profile data and exposes several useful commands:
-- <code>top &lt;N&gt; -cum</code> lists the top N functions, sorted such that the top listed function consumes the most CPU or memory or has the longest lock times, depending on profile under inspection.
-- <code>list &lt;function&gt;</code> lists the source code of a function and the lines that are the biggest contributors to resource consumption. You can specify a package name as a prefix to further filter the results. This command needs the binary file to be passed to the <code>pprof</code> tool in order to produce source code listings.
-- <code>web</code> opens a browser window containing an SVG image of the execution graph for the profiled program and the time spent or memory consumed in each call. Note that the graph is pruned, only the top offenders are displayed!
-Usually, you start with <code>top</code> to find suspicious functions then dig deeper with <code>list</code>. <a href="https://github.com/bradfitz/talk-yapc-asia-2015/blob/master/talk.md#cpu-profiling">This</a> is an example of how the output of these commands looks like.</p>
+<p>This command will start a <code>pprof</code> session, which loads up all the profile data and exposes several useful commands:</p>
+
+<ul>
+<li><code>top &lt;N&gt; -cum</code> lists the top N functions, sorted such that the top listed function consumes the most CPU or memory or has the longest lock times, depending on profile under inspection.</li>
+<li><code>list &lt;function&gt;</code> lists the source code of a function and the lines that are the biggest contributors to resource consumption. You can specify a package name as a prefix to further filter the results. This command needs the binary file to be passed to the <code>pprof</code> tool in order to produce source code listings.</li>
+<li><code>web</code> opens a browser window containing an SVG image of the execution graph for the profiled program and the time spent or memory consumed in each call. Note that the graph is pruned, only the top offenders are displayed!</li>
+</ul>
+
+<p>Usually, you start with <code>top</code> to find suspicious functions then dig deeper with <code>list</code>. <a href="https://github.com/bradfitz/talk-yapc-asia-2015/blob/master/talk.md#cpu-profiling">This</a> is an example of how the output of these commands looks like.</p>
 
 <p>When analyzing a memory profile with <code>pprof</code>, make sure to add the <code>-alloc_space</code> flag which displays allocated memory sizes, it will make <code>list</code> better.</p>
 
@@ -573,10 +581,10 @@ That being said, the level of insight you can get into Go programs with just the
 
   <div id=links>
     
-      <a class="basic-alignment left" href="http://alexandrutopliceanu.ro/post/graphql-with-go-and-postgresql/">&laquo; graphql with go and postgresql</a>
+      <a class="basic-alignment left" href="http://alexandrutopliceanu.ro/post/graphql-with-go-and-postgresql/">&laquo; GraphQL With Golang and PostgreSQL</a>
     
     
-      <a class="basic-alignment left" href="http://alexandrutopliceanu.ro/post/introduction-to-graphql/">[video] introduction to graphql &raquo;</a>
+      <a class="basic-alignment left" href="http://alexandrutopliceanu.ro/post/introduction-to-graphql/">[video] Introduction to GraphQL &raquo;</a>
     
   </div>
 </section>

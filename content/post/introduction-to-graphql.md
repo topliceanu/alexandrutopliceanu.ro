@@ -1,8 +1,7 @@
 +++
+title = "[video] Introduction to GraphQL"
 date = "2017-02-17T23:17:08Z"
-title = "[video] introduction to graphql"
 draft = false
-
 +++
 
 # Introduction to GraphQL
