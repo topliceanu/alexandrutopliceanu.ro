@@ -251,4 +251,4 @@ architecture.
 In future blog posts, I will try to answer some of the questions left unanswered in
 this post and continue my exploration of the k8s codebase.
 
-Let me know what you think in the comments section on [hacker news]().
+Let me know what you think in the comments section on [hacker news](https://news.ycombinator.com/).
