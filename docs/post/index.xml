@@ -6,13 +6,23 @@
     <description>Recent content in Posts on alexandru topliceanu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 17 Feb 2017 23:17:08 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 01 Feb 2018 22:08:22 +0000</lastBuildDate>
     
 	<atom:link href="http://alexandrutopliceanu.ro/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>[video] introduction to graphql</title>
+      <title>Scheduling in Kubernetes</title>
+      <link>http://alexandrutopliceanu.ro/post/scheduling-in-kubernetes/</link>
+      <pubDate>Thu, 01 Feb 2018 22:08:22 +0000</pubDate>
+      
+      <guid>http://alexandrutopliceanu.ro/post/scheduling-in-kubernetes/</guid>
+      <description>The importance of understanding the implementation of the tools we use in production every day cannot be underestimated.
+This process informs about the trade-offs engineers made in the implementations. Knowing a tool&amp;rsquo;s strengths and weaknesses helps better design systems on top of it; it exposes potential failure modes and helps debug critical errors when they occur. It also reveals brilliant ideas, tricks, patterns and conventions used in production systems.</description>
+    </item>
+    
+    <item>
+      <title>[video] Introduction to GraphQL</title>
       <link>http://alexandrutopliceanu.ro/post/introduction-to-graphql/</link>
       <pubDate>Fri, 17 Feb 2017 23:17:08 +0000</pubDate>
       
@@ -22,23 +32,24 @@ The talk is a short introduction on GraphQL. My goal here is to describe how Gra
     </item>
     
     <item>
-      <title>quality go code</title>
+      <title>Writing Quality Golang Code</title>
       <link>http://alexandrutopliceanu.ro/post/quality-go-code/</link>
       <pubDate>Sat, 11 Feb 2017 15:16:45 +0000</pubDate>
       
       <guid>http://alexandrutopliceanu.ro/post/quality-go-code/</guid>
-      <description>Quality Golang Code The tools I use to help produce quality Golang code
+      <description>The tools I use to help produce quality Golang code
 Abstract Go has excellent libraries for source-code parsing. These have enabled the creators of Go and the open source community to produce a variety of tools which help eliminate errors in advance.
 The large number of tools and the lack of documentation on how to best use them presents a problem for engineers. This blog post describes the process and the tools I use to improve code quality and catch bugs early in my Go code.</description>
     </item>
     
     <item>
-      <title>graphql with go and postgresql</title>
+      <title>GraphQL With Golang and PostgreSQL</title>
       <link>http://alexandrutopliceanu.ro/post/graphql-with-go-and-postgresql/</link>
       <pubDate>Sun, 22 Jan 2017 08:28:53 +0000</pubDate>
       
       <guid>http://alexandrutopliceanu.ro/post/graphql-with-go-and-postgresql/</guid>
-      <description>GraphQL In Use: Building a Blogging Engine API with Golang and PostgreSQL Abstract GraphQL appears hard to use in production: the graph interface is flexible in its modeling capabilities but is a poor match for relational storage, both in terms of implementation and performance.
+      <description>Building a Blogging Engine API with Golang and PostgreSQL
+Abstract GraphQL appears hard to use in production: the graph interface is flexible in its modeling capabilities but is a poor match for relational storage, both in terms of implementation and performance.
 In this document, we will design and write a simple blogging engine API, with the following specification:
  three types of resources (users, posts and comments) supporting a varied set of functionality (create a user, create a post, add a comment to a post, follow posts and comments from another user, etc.</description>
     </item>

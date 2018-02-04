@@ -7,7 +7,7 @@ draft: false
 The importance of understanding the implementation of the tools we use in
 production every day cannot be underestimated.
 
-This process informs about the tradeoffs engineers made in the implementations.
+This process informs about the trade-offs engineers made in the implementations.
 Knowing a tool's strengths and weaknesses helps better design systems on top
 of it; it exposes potential failure modes and helps debug critical errors when
 they occur. It also reveals brilliant ideas, tricks, patterns and conventions used in
@@ -15,15 +15,15 @@ production systems.
 
 In this post, I will go through the implementation of the default scheduler in
 Kubernetes (k8s).
-Although, k8s has a large set of features, tending towards a full-blown PaaS,
+Although k8s has a large set of features, tending towards a full-blown PaaS,
 at it’s core, k8s is a cluster scheduler, that is to say, it schedules work
 (pods) onto computing resources (nodes).
 
 ## The genericScheduler
 
-K8s has different mechanisms to control pod scheduling: node and pod affinity and
-anti-affinity taints and tolerations and it also has support for custom schedulers. I will look at how all these options factor into the default
-scheduling process.
+K8s has different mechanisms to control pod scheduling: node/pod affinity/anti-affinity,
+taints, tolerations and it also has support for custom schedulers.
+I will look at how all these options factor into the default scheduling process.
 
 The core abstraction for the scheduler in k8s is called `genericScheduler`.
 If you clone [github.com/kubernetes/kubernetes](github.com/kubernetes/kubernetes)
@@ -87,7 +87,7 @@ func (g *genericScheduler) Schedule(pod *v1.Pod, nodeLister algorithm.NodeLister
 }
 ```
 
-K8s schedules pods on a first come first served order. It formes a queue of all
+K8s schedules pods on a first come, first served order. It forms a queue of all
 the requests to schedule pods and processes them one by one. At this point, there
 is no concurrency which makes the code simpler. I’ll show later how k8s makes
 the process fast.
@@ -102,7 +102,7 @@ being deleted.
 
 In k8s, nodes represent compute resources and pods consume those compute resources.
 PVs are similar to nodes, but they represent disk resources available to the cluster.
-Conceptually they map to physical disks, same way nodes maps to machine, of course,
+Conceptually, they map to physical disks in the same way nodes maps to machine, of course,
 in reality, there are layers of virtualization in between.
 PVs are defined by the administrators of the cluster, while PVCs are
 defined by the users of the cluster, the service developers.
@@ -168,7 +168,7 @@ Priorities, much like predicates, take a node and a pod but instead of a binary
 value, return a _“score”_, an integer between 1 and 10. This step is called
 filtering and is where the algorithm ranks all the nodes to find the best one
 suited for the pod.
-This is done in the `PrioritizeNodes()` method and is also runs concurrently on
+This is done in the `PrioritizeNodes()` method and also runs concurrently on
 16 goroutines and uses cached data. The scores are also weighted by the importance
 of each priority function.
 
@@ -176,7 +176,34 @@ Finally, all the scores for a node are added to a final score per node. Then, no
 sorted by this final score in a priority queue (heap) which is returned by
 `PrioritizeNodes()`.
 
-The user of concurrency to compute the predicates and the final scores makes sense,
+Priorities implement [algorithm.PriorityConfig]() and are located in the
+[src/scheduler/algorithm/priorities](https://github.com/kubernetes/kubernetes/tree/master/pkg/scheduler/algorithm/priorities).
+Here is a list with some of them:
+
+```
+├──alanced_resource_allocation.go
+├──mage_locality.go
+├──nterpod_affinity.go
+├──east_requested.go
+├──ost_requested.go
+├──ode_affinity.go
+├──ode_label.go
+├──ode_prefer_avoid_pods.go
+├──resource_allocation.go
+├──resource_limits.go
+├──selector_spreading.go
+└──taint_toleration.go
+```
+
+At first glance, most priorities seem to do the same as predicates.
+However, predicates are designed to dismiss a node which is incapable of running the pod,
+while priorities are designed to rank all the nodes that _can_ run the pod.
+For instance, given a pod which requires 500 millicpu, a resource predicate will return
+false for a node which only has 300 millicpu left. For the same pod, a priority
+function will return a higher score for a node which has 25000millicpu than for one
+which has 800millicpu left, even though both can accommodate the pod.
+
+The use of concurrency in order to compute the predicates and the scores makes sense,
 one question that I have is why is this hardcoded to 16 workers? I would expect
 that tuning this value would be helpful, for instance in large clusters which run
 the k8s master on powerful hardware. It may be that the yield is not significant.
@@ -184,36 +211,42 @@ the k8s master on powerful hardware. It may be that the yield is not significant
 ## Node Selection
 
 The final step is `selectHost()` which pops the top nodes from the priority queue.
-If multiple nodes have the same score, this method picks one node in a round-robin manner and returns it. In turn, `Schedule()` will return the picked node
+If multiple nodes have the same score, this method picks one node in a round-robin
+manner and returns it. In turn, `Schedule()` will return the picked node.
 
 ## Custom Scheduler
 
 All pods in k8s are, by default, scheduled using this algorithm.
-Pods objects have metadata, specs and state. In a scheduled pod’s resolved status,
+Pod objects have metadata, spec and status. In a scheduled pod’s resolved status,
 there is the field: `"scheulderName": "defaultScheduler"`.
 
-K8s supports the use of custom schedulers. A custom scheduler runs like a normal
-deployment in k8s, where it is managed by the default scheduler. A custom scheduler,
-let's say it is called `my-scheduler`, will pick up all the pods which have
-`"schedulerName": "my-scheduler"` in their object spec.
+You can implement your own scheduler and rebuild k8s with it. Schedulers need to
+implement the [algorithm.ScheduleAlgorithm](https://github.com/kubernetes/kubernetes/blob/master/pkg/scheduler/algorithm/scheduler_interface.go#L46-L61).
 
-You can learn more about this operation in these two blog posts:
+K8s also supports the use of custom schedulers as separate processes.
+A custom scheduler runs like a normal deployment in k8s, where it is managed
+by the default scheduler. A custom scheduler, let's call it `my-scheduler`,
+will pick up all the pods which have `"schedulerName": "my-scheduler"` in their object spec.
+
+You can learn more about this option in these two blog posts:
 [here](http://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html)
 and [here](https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/).
 
 A question whose answer is not clear immediately from the code is how do multiple
 schedulers coordinate. A scheduler needs to know which resources it has available
-to assign pods to if there’s another scheduler competing for the same resources,
+to assign pods to. If there’s another scheduler competing for the same resources,
 how does k8s prevent over-scheduling the nodes!?
 
 ## Conclusion
 
 K8s' implementation of the generic scheduler, with it's FIFO logic, suggests that
-it is optimized for long-running processes, such as services and microservice
-architecture, which is where k8s is very popular at the moment. If the workloads
-contained a lot of small and short jobs, for example, a serverless infrastructure,
-the generic scheduler will probably not be fast enough.
+it is optimized for long-running processes, such in a microservice architecture,
+which is where k8s is very popular at the moment. If the workload
+contains a lot of small and short jobs (eg. a serverless infrastructure) then
+the generic scheduler will probably not be very efficient because of the FIFO
+architecture.
 
-In future blog posts, I will try to answer some of the questions from posed in
+In future blog posts, I will try to answer some of the questions left unanswered in
 this post and continue my exploration of the k8s codebase.
 
+Let me know what you think in the comments section on [hacker news]().
