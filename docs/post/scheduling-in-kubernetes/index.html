@@ -523,6 +523,8 @@ so it is cached and updated in <code>UpdateNodeNameToInfo()</code>.</p>
 
 <p>K8s picks the most appropriate node out of the list of candidates in two steps: predicates and filters.</p>
 
+<p><img src="funnel.png" alt="Filtering the nodes in stages" /></p>
+
 <h3 id="predicates">Predicates</h3>
 
 <p>Predicates are pure functions which take a node and a pod and return a boolean

@@ -120,6 +120,8 @@ so it is cached and updated in `UpdateNodeNameToInfo()`.
 
 K8s picks the most appropriate node out of the list of candidates in two steps: predicates and filters.
 
+![Filtering the nodes in stages](funnel.png)
+
 ### Predicates
 
 Predicates are pure functions which take a node and a pod and return a boolean
