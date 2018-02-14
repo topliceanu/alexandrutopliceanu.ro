@@ -430,7 +430,7 @@ taints, tolerations and it also has support for custom schedulers.
 I will look at how all these options factor into the default scheduling process.</p>
 
 <p>The core abstraction for the scheduler in k8s is called <code>genericScheduler</code>.
-If you clone <a href="github.com/kubernetes/kubernetes">github.com/kubernetes/kubernetes</a>
+If you clone <a href="https://github.com/kubernetes/kubernetes">github.com/kubernetes/kubernetes</a>
 master, you can find it in <a href="https://github.com/kubernetes/kubernetes/blob/master/pkg/scheduler/core/generic_scheduler.go">pkg/scheduler/core/generic_scheduler.go</a>.
 The main method of this structure is called <code>Schedule</code>, which
 functions as a <a href="https://en.wikipedia.org/wiki/Template_method_pattern">template method pattern</a>,

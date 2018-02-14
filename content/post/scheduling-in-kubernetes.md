@@ -26,7 +26,7 @@ taints, tolerations and it also has support for custom schedulers.
 I will look at how all these options factor into the default scheduling process.
 
 The core abstraction for the scheduler in k8s is called `genericScheduler`.
-If you clone [github.com/kubernetes/kubernetes](github.com/kubernetes/kubernetes)
+If you clone [github.com/kubernetes/kubernetes](https://github.com/kubernetes/kubernetes)
 master, you can find it in [pkg/scheduler/core/generic_scheduler.go](https://github.com/kubernetes/kubernetes/blob/master/pkg/scheduler/core/generic_scheduler.go).
 The main method of this structure is called `Schedule`, which
 functions as a [template method pattern](https://en.wikipedia.org/wiki/Template_method_pattern),
