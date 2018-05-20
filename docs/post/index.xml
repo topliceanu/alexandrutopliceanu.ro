@@ -6,10 +6,22 @@
     <description>Recent content in Posts on alexandru topliceanu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 01 Feb 2018 22:08:22 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 11 Mar 2018 19:25:53 +0000</lastBuildDate>
     
 	<atom:link href="http://alexandrutopliceanu.ro/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Targeted Quantiles in Prometheus</title>
+      <link>http://alexandrutopliceanu.ro/post/targeted-quantiles/</link>
+      <pubDate>Sun, 11 Mar 2018 19:25:53 +0000</pubDate>
+      
+      <guid>http://alexandrutopliceanu.ro/post/targeted-quantiles/</guid>
+      <description>The algorithm behind Prometheus&amp;rsquo; Summaries.
+Abstract TODO
+Introduction The hearthstone of understanding of how your distributed system works in production is monitoring. In recent years, Prometheus has emerged as the most popular monitoring system for applications deployed on Kubernetes. Apart from the more common counters and gauges, the prometheus client exposes the summary metric type. In a go project, it might look like this:
+// This is the definition of a metric which tracks the latency of an RPC request.</description>
+    </item>
     
     <item>
       <title>Scheduling in Kubernetes</title>

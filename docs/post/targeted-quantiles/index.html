@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <base href="http://alexandrutopliceanu.ro/">
+    
+
+    <link rel="dns-prefetch" href="//fonts.googleapis.com/">
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Old+Standard+TT:400' rel='stylesheet' type='text/css'>
+
+    <title>
+      
+      
+         Targeted Quantiles in Prometheus 
+      
+    </title>
+    <link rel="canonical" href="http://alexandrutopliceanu.ro/post/targeted-quantiles/">
+
+    <style>
+  * {
+    border:0;
+    font:inherit;
+    font-size:100%;
+    vertical-align:baseline;
+    margin:0;
+    padding:0;
+    color: black;
+  }
+
+  body {
+    font-family:'Open Sans', 'Myriad Pro', Myriad, sans-serif;
+    font-size:17px;
+    line-height:160%;
+    color:#1d1313;
+    max-width:700px;
+    margin:auto;
+  }
+
+  p {
+    margin: 5px 0 10px 0;
+  }
+
+  a img {
+    border:none;
+  }
+
+  img {
+    margin: 10px auto 10px auto;
+    max-width: 100%;
+    display: block;
+  }
+
+  pre, code {
+    font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    background-color: #f7f7f7;
+  }
+
+  code {
+    font-size: 12px;
+    padding: 4px;
+  }
+
+  pre {
+    margin-top: 0;
+    margin-bottom: 16px;
+    word-wrap: normal;
+    padding: 16px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+  }
+
+  pre>code {
+    padding: 0;
+    margin: 0;
+    font-size: 100%;
+    word-break: normal;
+    white-space: pre;
+    background: transparent;
+    border: 0;
+  }
+
+  pre code {
+    display: inline;
+    max-width: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    line-height: inherit;
+    word-wrap: normal;
+    background-color: transparent;
+    border: 0;
+  }
+
+  pre code::before,
+  pre code::after {
+    content: normal;
+  }
+
+  em,q,em,dfn {
+    font-style:italic;
+  }
+
+  .sans,html .gist .gist-file .gist-meta {
+    font-family:"Open Sans","Myriad Pro",Myriad,sans-serif;
+  }
+
+  .mono,pre,code,tt,p code,li code {
+    font-family:Menlo,Monaco,"Andale Mono","lucida console","Courier New",monospace;
+  }
+
+  .heading,.serif,h1,h2,h3 {
+    font-family:"Old Standard TT",serif;
+  }
+
+  strong {
+    font-weight:600;
+  }
+
+  q:before {
+    content:"\201C";
+  }
+
+  q:after {
+    content:"\201D";
+  }
+
+  del,s {
+    text-decoration:line-through;
+  }
+
+  blockquote {
+    font-family:"Old Standard TT",serif;
+    text-align:center;
+    padding:50px;
+  }
+
+  blockquote p {
+    display:inline-block;
+    font-style:italic;
+  }
+
+  blockquote:before,blockquote:after {
+    font-family:"Old Standard TT",serif;
+    content:'\201C';
+    font-size:35px;
+    color:#403c3b;
+  }
+
+  blockquote:after {
+    content:'\201D';
+  }
+
+  hr {
+    width:40%;
+    height: 1px;
+    background:#403c3b;
+    margin: 25px auto;
+  }
+
+  h1 {
+    font-size:35px;
+  }
+
+  h2 {
+    font-size:28px;
+  }
+
+  h3 {
+    font-size:22px;
+    margin-top:18px;
+  }
+
+  h1 a,h2 a,h3 a {
+    text-decoration:none;
+  }
+
+  h1,h2 {
+    margin-top:28px;
+  }
+
+  #sub-header, time {
+    color:#403c3b;
+    font-size:13px;
+  }
+
+  #sub-header {
+    margin: 0 4px;
+  }
+
+  #nav h1 a {
+    font-size:35px;
+    color:#1d1313;
+    line-height:120%;
+  }
+
+  .posts_listing a,#nav a {
+    text-decoration: none;
+  }
+
+  li {
+    margin-left: 20px;
+  }
+
+  ul li {
+    margin-left: 5px;
+  }
+
+  ul li {
+    list-style-type: none;
+  }
+  ul li:before {
+    content:"\00BB \0020";
+  }
+
+  #nav ul li:before, .posts_listing li:before {
+    content:'';
+    margin-right:0;
+  }
+
+  #content {
+    text-align:left;
+    width:100%;
+    font-size:15px;
+    padding:60px 0 80px;
+  }
+
+  #content h1,#content h2 {
+    margin-bottom:5px;
+  }
+
+  #content h2 {
+    font-size:25px;
+  }
+
+  #content .entry-content {
+    margin-top:15px;
+  }
+
+  #content time {
+    margin-left:3px;
+  }
+
+  #content h1 {
+    font-size:30px;
+  }
+
+  .highlight {
+    margin: 10px 0;
+  }
+
+  .posts_listing {
+    margin:0 0 50px;
+  }
+
+  .posts_listing li {
+    margin:0 0 25px 15px;
+  }
+
+  .posts_listing li a:hover,#nav a:hover {
+    text-decoration: underline;
+  }
+
+  #nav {
+    text-align:center;
+    position:static;
+    margin-top:60px;
+  }
+
+  #nav ul {
+    display: table;
+    margin: 8px auto 0 auto;
+  }
+
+  #nav li {
+    list-style-type:none;
+    display:table-cell;
+    font-size:15px;
+    padding: 0 20px;
+  }
+
+  #links {
+    margin: 50px 0 0 0;
+  }
+
+  #links :nth-child(2) {
+    float:right;
+  }
+
+  #not-found {
+    text-align: center;
+  }
+
+  #not-found a {
+    font-family:"Old Standard TT",serif;
+    font-size: 200px;
+    text-decoration: none;
+    display: inline-block;
+    padding-top: 225px;
+  }
+
+  @media (max-width: 750px) {
+    body {
+      padding-left:20px;
+      padding-right:20px;
+    }
+
+    #nav h1 a {
+      font-size:28px;
+    }
+
+    #nav li {
+      font-size:13px;
+      padding: 0 15px;
+    }
+
+    #content {
+      margin-top:0;
+      padding-top:50px;
+      font-size:14px;
+    }
+
+    #content h1 {
+      font-size:25px;
+    }
+
+    #content h2 {
+      font-size:22px;
+    }
+
+    .posts_listing li div {
+      font-size:12px;
+    }
+  }
+
+  @media (max-width: 400px) {
+    body {
+      padding-left:20px;
+      padding-right:20px;
+    }
+
+    #nav h1 a {
+      font-size:22px;
+    }
+
+    #nav li {
+      font-size:12px;
+      padding: 0 10px;
+    }
+
+    #content {
+      margin-top:0;
+      padding-top:20px;
+      font-size:12px;
+    }
+
+    #content h1 {
+      font-size:20px;
+    }
+
+    #content h2 {
+      font-size:18px;
+    }
+
+    .posts_listing li div{
+      font-size:12px;
+    }
+  }
+</style>
+
+
+    <link rel="shortcut icon" href="http://alexandrutopliceanu.ro/favicon.ico">
+
+    
+  </head>
+
+  <body>
+    <section id=nav>
+      <h1><a href="http://alexandrutopliceanu.ro/">Alexandru Topliceanu</a></h1>
+      <ul>
+        
+          <li><a href="mailto:alexandru.topliceanu@gmail.com">Email</a></li>
+        
+          <li><a href="https://github.com/topliceanu">Github</a></li>
+        
+          <li><a href="http://eepurl.com/cCDKev">Subscribe</a></li>
+        
+          <li><a href="https://twitter.com/topliceanu">Twitter</a></li>
+        
+      </ul>
+    </section>
+
+
+<section id=content>
+  <h1> Targeted Quantiles in Prometheus </h1>
+
+  <div id=sub-header>
+    March 2018 · 6 minute read
+  </div>
+
+  <div class="entry-content">
+    
+
+<p><em>The algorithm behind Prometheus&rsquo; Summaries.</em></p>
+
+<h2 id="abstract">Abstract</h2>
+
+<p><em>TODO</em></p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>The hearthstone of understanding of how your distributed system works in production is monitoring.
+In recent years, Prometheus has emerged as the most popular monitoring system for applications deployed on Kubernetes.
+Apart from the more common counters and gauges, the prometheus client exposes the <a href="https://godoc.org/github.com/prometheus/client_golang/prometheus#Summary">summary</a> metric type. In a go project, it might look like this:</p>
+
+<pre><code class="language-golang">// This is the definition of a metric which tracks the latency of an RPC request.
+latency := prometheus.NewSummary(prometheus.SummaryOpts{
+  Name:       &quot;rpc_durations_seconds&quot;,
+  Help:       &quot;RPC latency distributions.&quot;,
+  Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+})
+
+// This is how you would use it.
+reqDuration := rand.Float64()
+latency.Observe(reqDuration)
+</code></pre>
+
+<p>This code was extracted from the <a href="https://github.com/prometheus/client_golang/blob/master/examples/random/main.go">prometheus/client-golang example</a></p>
+
+<p>In the above case, the summary will give us the 99th, 90th and 50th percentile for the latency of that particular RPC request.</p>
+
+<p>This is what it would look like in Graphana, a popular frontend for Prometheus:</p>
+
+<p><img src="rpc-latency.png" alt="RPC Latency Chart in Graphana" /></p>
+
+<p>Prometheus uses a data structure called Targeted Quantiles to calculate Summaries very efficiently. In this post I will describe how they are implemented and why they are so efficient.</p>
+
+<h2 id="quantiles-and-percentiles">Quantiles and Percentiles</h2>
+
+<p>This section is a small detour to describe what quantiles and percentiles are.</p>
+
+<p>A quantile <code>q</code> in a dataset of size n is the element with rank <code>math.Ceil(q * n)</code>, where <code>0 &lt;= q &lt;= 1</code> and the rank of an element is its index is the sorted dataset.</p>
+
+<p>For example, let <code>a</code> be a list of 20 integers, between 1 and 20, with duplicates:</p>
+
+<pre><code class="language-golang">a := []int{11, 9, 13, 19, 13, 13, 5, 12, 7, 16, 6, 15, 17, 1, 19, 5, 11, 10, 18, 2}
+</code></pre>
+
+<p>Let&rsquo;s sort <code>a</code> into a variable called <code>b</code>:</p>
+
+<pre><code class="language-golang">b := []int{1, 2, 5, 5, 6, 7, 9, 10, 11, 11, 12, 13, 13, 13, 15, 16, 18, 17, 19, 19}
+</code></pre>
+
+<p>The 0.9 quantile of the dataset <code>a</code> of size 20 is the element with index <code>0.9 * 20 == 18</code> in the sorted version <code>b</code>, which is 17!</p>
+
+<p><em>Note</em> that the quantile is defined as a function of all the values in the input dataset.</p>
+
+<p>Percentiles are the same concept as quantiles, except percentiles are expressed as percentages. So the percentile <code>p</code> of a dataset of size n is the element with rank <code>math.Ceil(p * n / 100)</code></p>
+
+<p>In the above example, the 99th percentile is element with index <code>math.Ceil(99 * 20 / 100) == 20</code> in <code>b</code>, so the value <code>19</code>.</p>
+
+<h2 id="how-does-it-work">How Does It Work</h2>
+
+<p>In the previous section we calculated the 0.9 quantile for an array of 20 numbers. We had the advantage of a small dataset. Tracking request latencies across an architecture with hundreds of microservices amounts to a very large volume of observations. The distribution of those observations typically has long tails which are of great interest: we want to know what is the worst latency a service produces. All this makes sampling not an option!</p>
+
+<p>What is needed is a streaming approach with space complexity significantly sublinear to the size of the input. Some of the original conditions have to be relaxed: define the percentiles of interest from the start and introduce an acceptable error for each of them. That is the reason why, the <code>Objectives</code> of a Prometheus summary have the wanted quantiles as keys and the acceptable errors as values:</p>
+
+<pre><code class="language-golang">map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+</code></pre>
+
+<p><em>Note</em> that the error is not applied to the value returned but to the rank produced. Remember that a quantile coresponds to a rank in the sorted version of the input dataset, which in turn corresponds to a value from the original dataset. In the above example, the algorithm will produce percentiles in the range <code>[0.45, 0.55]</code> for the <code>0.5</code> target; <code>[0.89, 0.91]</code> for the <code>0.9</code> target and <code>[0.989, 0.991]</code> for the <code>0.99</code> target.</p>
+
+<p>It is very important that the algorithm produces a value that was actually observed rather than an aggregate (like a mean or a max) by the definition of a quantile.</p>
+
+<p>The abstract data structure employed by the algorithm is a sorted list, with the folling operations:</p>
+
+<ul>
+<li><code>Insert(float64)</code> calculate the lowest and highest possible rank for the new value, then inserts it into the list, maintaining the list sorted. Each value in the list covers a range or ranks, bounded by the configured errors.</li>
+<li><code>Query(float64) float64</code> traverses the list to find the value whose range or covered ranks includes the rank corresponding to the requested quantile. It then returns that value.</li>
+<li><code>Compress()</code> walks through the list and removes all the values that are redundant; as more values are added, the rank intervals for the targeted quantiles shift and start overlaping. Compress finds these overlaping values and removes them.</li>
+</ul>
+
+<p>The prometheus implementation uses a small slice (500 samples) as a concrete data structure and runs <code>Compress</code> imediately after each insert.</p>
+
+<p>The following table shows the algorithm at work on a dataset of 30 samples: shuffled integeres from 1 to 30 inclusive.</p>
+
+<p><img src="targeted-quantiles-execution.png" alt="Targeted quantiles execution on a dataset of size 30" /></p>
+
+<p>You can find the script which generated this table <a href="https://github.com/topliceanu/perks/commit/cff191c15ce1991cf393d06813790a736867c61f">in this commit</a>. To make it work, the size of the internal list used in the implementation was reduced from 500 to 10, to better show how <code>Compress</code> works.</p>
+
+<h2 id="observations">Observations</h2>
+
+<p>Because quantile values will shift as more data is consumed, the algorithm has to keep value around to make sure it covers the error constraint. Consequently, the lower the error for a quantile, the more data the algorithm has to store.</p>
+
+<p>For example, the 0.5 quantile with a 0.05 error is fine, because most values around the mean will be very similar so there&rsquo;s no point storing more of them. However, for 0.99 quantile the error has to be much smaller to catch the outliers. On the other had, the tail values are much less frequent so the algorithm will not have to store a lot of data.</p>
+
+<p>The algorithm does not sample, that is to say it considers all the input values, but prunes the ones that are not relevant to the objective quantiles.</p>
+
+<p>Space complexity is proportional to the number of quantiles of
+interest, not the size of the input! To keep the data structure small, <code>Compress</code> has to be executed often to prune the values that are not needed. To get the best time complexity, a Red-Black Tree can be used for fast lookups, deletes and range queries.</p>
+
+<p>Two separate data structure instances with the same target quantiles can be merged by simply inserting the values from one into the other and running <code>Compress</code>.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Very interesting things occur in resource constrained environments. Tradeoffs have to be made and errors levels have to be accepted to do usefull work. There is a whole category of algorithms suitable for these situations and they prove useful outside of their original context. Targeted quantiles have been developed originally for networking hardware but we use them all the time to monitor our kuberentes deployments. I encourage you to always be curios about how the things you use every day work.</p>
+
+<h2 id="references">References</h2>
+
+<ol>
+<li>The original paper cited in the Prometheus implementation is <a href="https://www.cs.rutgers.edu/~muthu/bquant.pdf">Effective Computation of Biased Quantiles over Data Streams by Cormode et al.</a>. It describes a generic algorithm called Biased Quantiles. It introduces High-Biased, Low-Biased and Targeted Quantiles as specializations. It contains a mathematical prof of correctness and an analysis of the performance characteristics.</li>
+<li>A newer paper from the same research group: <a href="http://dimacs.rutgers.edu/~graham/pubs/papers/bq-pods.pdf">Space- and Time-Efficieng Deterministic Algorithms for Biased Quantiles over Data Streams</a>. It presents an even more generalised algorithm which extends to answering rank queries as well as biased and targeted quantiles.</li>
+<li>The implementation used in the prometheus global client is <a href="https://github.com/beorn7/perks/tree/master/quantile">github.com/beorn7/perks/quantile</a></li>
+<li>The <a href="https://prometheus.io/docs/practices/histograms/#errors-of-quantile-estimation">prometheus documentation</a> for quantile estimation.</li>
+</ol>
+
+  </div>
+
+  <div id=links>
+    
+      <a class="basic-alignment left" href="http://alexandrutopliceanu.ro/post/scheduling-in-kubernetes/">&laquo; Scheduling in Kubernetes</a>
+    
+    
+  </div>
+</section>
+
+  </div>
+  
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-24987736-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+</body>
+</html>
+
+
+
