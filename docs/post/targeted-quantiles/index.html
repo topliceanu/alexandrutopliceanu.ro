@@ -402,7 +402,7 @@
   <h1> Targeted Quantiles in Prometheus </h1>
 
   <div id=sub-header>
-    March 2018 · 6 minute read
+    March 2018 · 7 minute read
   </div>
 
   <div class="entry-content">
@@ -412,113 +412,156 @@
 
 <h2 id="abstract">Abstract</h2>
 
-<p><em>TODO</em></p>
+<p>Prometheus uses a technique called Targeted Quantiles to implement the Summary metric type which is used to monitor distributions, such as latencies.
+Here, we give an overview of how the algorithm works, we answer why it is so efficient and how to configure Summaries.</p>
 
 <h2 id="introduction">Introduction</h2>
 
-<p>The hearthstone of understanding of how your distributed system works in production is monitoring.
-In recent years, Prometheus has emerged as the most popular monitoring system for applications deployed on Kubernetes.
-Apart from the more common counters and gauges, the prometheus client exposes the <a href="https://godoc.org/github.com/prometheus/client_golang/prometheus#Summary">summary</a> metric type. In a go project, it might look like this:</p>
+<p>A very important way of understanding how your distributed system works in production is to monitor it.
+In recent years, Prometheus has emerged as the most popular monitoring system for applications deployed on Kubernetes.</p>
 
-<pre><code class="language-golang">// This is the definition of a metric which tracks the latency of an RPC request.
+<p>Apart from the more common counters and gauges, the Prometheus client exposes the <a href="https://godoc.org/github.com/prometheus/client_golang/prometheus#Summary">Summary</a> metric type.
+In a Go project, it might look like this:</p>
+
+<pre><code class="language-golang">// This is the definition of a metric which tracks the latency of an RPC.
 latency := prometheus.NewSummary(prometheus.SummaryOpts{
   Name:       &quot;rpc_durations_seconds&quot;,
   Help:       &quot;RPC latency distributions.&quot;,
   Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 })
 
-// This is how you would use it.
+// This is how you would use it somewhere in your code.
 reqDuration := rand.Float64()
 latency.Observe(reqDuration)
 </code></pre>
 
 <p>This code was extracted from the <a href="https://github.com/prometheus/client_golang/blob/master/examples/random/main.go">prometheus/client-golang example</a></p>
 
-<p>In the above case, the summary will give us the 99th, 90th and 50th percentile for the latency of that particular RPC request.</p>
+<p>In the above case, the Summary will give us the 99th, 90th and 50th percentile for the latency of that particular RPC request.</p>
 
-<p>This is what it would look like in Graphana, a popular frontend for Prometheus:</p>
+<p>This is what it would look like in Graphana, a popular GUI for Prometheus:</p>
 
 <p><img src="rpc-latency.png" alt="RPC Latency Chart in Graphana" /></p>
 
-<p>Prometheus uses a data structure called Targeted Quantiles to calculate Summaries very efficiently. In this post I will describe how they are implemented and why they are so efficient.</p>
+<p>Prometheus uses a data structure called Targeted Quantiles to calculate Summaries very efficiently.
+In this post I will describe how they are implemented and why they are so efficient.</p>
 
 <h2 id="quantiles-and-percentiles">Quantiles and Percentiles</h2>
 
 <p>This section is a small detour to describe what quantiles and percentiles are.</p>
 
-<p>A quantile <code>q</code> in a dataset of size n is the element with rank <code>math.Ceil(q * n)</code>, where <code>0 &lt;= q &lt;= 1</code> and the rank of an element is its index is the sorted dataset.</p>
+<p>A quantile <code>q</code> in a dataset of size n is the element with rank <code>math.Ceil(q * n)</code>, where <code>0 &lt;= q &lt;= 1</code>.
+The rank of an element is its index in the sorted dataset.</p>
 
-<p>For example, let <code>a</code> be a list of 20 integers, between 1 and 20, with duplicates:</p>
+<p>For example, let <code>a</code> be a list of 20 integers, between 1 and 20, as well as duplicates:</p>
 
 <pre><code class="language-golang">a := []int{11, 9, 13, 19, 13, 13, 5, 12, 7, 16, 6, 15, 17, 1, 19, 5, 11, 10, 18, 2}
 </code></pre>
 
 <p>Let&rsquo;s sort <code>a</code> into a variable called <code>b</code>:</p>
 
-<pre><code class="language-golang">b := []int{1, 2, 5, 5, 6, 7, 9, 10, 11, 11, 12, 13, 13, 13, 15, 16, 18, 17, 19, 19}
+<pre><code class="language-golang">b := []int{1, 2, 5, 5, 6, 7, 9, 10, 11, 11, 12, 13, 13, 13, 15, 16, 17, 18, 19, 19}
 </code></pre>
 
-<p>The 0.9 quantile of the dataset <code>a</code> of size 20 is the element with index <code>0.9 * 20 == 18</code> in the sorted version <code>b</code>, which is 17!</p>
+<p>The 0.9 quantile of the dataset <code>a</code> of size 20 is the element with index <code>0.9 * 20 == 18</code> from the sorted version <code>b</code>, which is 18!</p>
 
-<p><em>Note</em> that the quantile is defined as a function of all the values in the input dataset.</p>
+<p>Percentiles are the same concept as quantiles, except percentiles are expressed as percentages.
+So the percentile <code>p</code> of a dataset of size n is the element with rank <code>math.Ceil(p * n / 100)</code>, where <code>0 &lt;= p &lt;= 100</code>.</p>
 
-<p>Percentiles are the same concept as quantiles, except percentiles are expressed as percentages. So the percentile <code>p</code> of a dataset of size n is the element with rank <code>math.Ceil(p * n / 100)</code></p>
+<p>In the above example, the 99th percentile is element with index <code>math.Ceil(99 * 20 / 100) == 20</code> in <code>b</code>, resulting in the value <code>19</code>.</p>
 
-<p>In the above example, the 99th percentile is element with index <code>math.Ceil(99 * 20 / 100) == 20</code> in <code>b</code>, so the value <code>19</code>.</p>
+<h2 id="approach">Approach</h2>
 
-<h2 id="how-does-it-work">How Does It Work</h2>
+<p>In the previous section we calculated the 0.9 quantile for an array of 20 numbers.
+We had the advantage of a small dataset.
+Remember that the quantile is defined as a function of all the values in the input dataset.
+Tracking request latencies across an architecture with hundreds of microservices amounts to a very large volume of observations, even for a narrow sliding time window.</p>
 
-<p>In the previous section we calculated the 0.9 quantile for an array of 20 numbers. We had the advantage of a small dataset. Tracking request latencies across an architecture with hundreds of microservices amounts to a very large volume of observations. The distribution of those observations typically has long tails which are of great interest: we want to know what is the worst latency a service produces. All this makes sampling not an option!</p>
+<p>The distributions of latency observations typically have long tails which are of great interest:
+we want to know what are the worst latencies our services produce.
+Sampling is a popular method to reduce dataset sizes, but has a high probability to miss outliers, so in this case it&rsquo;s not an option!</p>
 
-<p>What is needed is a streaming approach with space complexity significantly sublinear to the size of the input. Some of the original conditions have to be relaxed: define the percentiles of interest from the start and introduce an acceptable error for each of them. That is the reason why, the <code>Objectives</code> of a Prometheus summary have the wanted quantiles as keys and the acceptable errors as values:</p>
+<p>What is needed is a streaming approach with space complexity <em>significantly</em> sublinear to the size of the input.
+Some of the original conditions need to be relaxed: the quantiles of interest and acceptable errors for each of them must be defined apriori,
+the system will not be able to produce any other quantile.
+In practice, this limitation is minor and the benefits are substantial: a space complexity linear with the number of targeted quantiles, not the size of dataset.
+The <code>Objectives</code> field of a Prometheus <code>Summary</code> has the targeted quantiles as keys and the acceptable errors as values:</p>
 
 <pre><code class="language-golang">map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 </code></pre>
 
-<p><em>Note</em> that the error is not applied to the value returned but to the rank produced. Remember that a quantile coresponds to a rank in the sorted version of the input dataset, which in turn corresponds to a value from the original dataset. In the above example, the algorithm will produce percentiles in the range <code>[0.45, 0.55]</code> for the <code>0.5</code> target; <code>[0.89, 0.91]</code> for the <code>0.9</code> target and <code>[0.989, 0.991]</code> for the <code>0.99</code> target.</p>
-
-<p>It is very important that the algorithm produces a value that was actually observed rather than an aggregate (like a mean or a max) by the definition of a quantile.</p>
-
-<p>The abstract data structure employed by the algorithm is a sorted list, with the folling operations:</p>
+<p><em>Note</em> that the error is not applied to the value returned but to the rank produced.
+Remember that a quantile corresponds to a rank in the sorted version of the input dataset, which in turn corresponds to a value from the original dataset.
+In the above example, the algorithm will produce quantiles in the ranges:</p>
 
 <ul>
-<li><code>Insert(float64)</code> calculate the lowest and highest possible rank for the new value, then inserts it into the list, maintaining the list sorted. Each value in the list covers a range or ranks, bounded by the configured errors.</li>
-<li><code>Query(float64) float64</code> traverses the list to find the value whose range or covered ranks includes the rank corresponding to the requested quantile. It then returns that value.</li>
-<li><code>Compress()</code> walks through the list and removes all the values that are redundant; as more values are added, the rank intervals for the targeted quantiles shift and start overlaping. Compress finds these overlaping values and removes them.</li>
+<li><code>[0.45, 0.55]</code> for the <code>0.5</code> target</li>
+<li><code>[0.89, 0.91]</code> for the <code>0.9</code> target</li>
+<li><code>[0.989, 0.991]</code> for the <code>0.99</code> target.</li>
 </ul>
 
-<p>The prometheus implementation uses a small slice (500 samples) as a concrete data structure and runs <code>Compress</code> imediately after each insert.</p>
+<p>It is important that the algorithm produces values from the original dataset, rather than aggregates (like a mean or a max), by the definition of a quantile.
+While aggregates are useful, higher abstractions on top of quantiles may use the property that the values were actually observed.</p>
 
-<p>The following table shows the algorithm at work on a dataset of 30 samples: shuffled integeres from 1 to 30 inclusive.</p>
+<h2 id="algorithm">Algorithm</h2>
+
+<p>The abstract data structure employed by the algorithm is a sorted list, with the following operations:</p>
+
+<ul>
+<li><code>Insert(float64)</code> calculates the lowest and highest possible rank for the new value, then inserts it into the list, maintaining the list sorted.
+Each value in the list covers a range of ranks, bounded by the configured errors.</li>
+<li><code>Query(float64) float64</code> traverses the list to find the value whose range of covered ranks includes the rank corresponding to the requested quantile. It then returns that value.</li>
+<li><code>Compress()</code> walks through the list and removes all the values that are redundant: as more values are added, the rank intervals for the targeted
+quantiles shift and start overlapping. Compress finds these overlapping values and removes them.</li>
+</ul>
+
+<p>The Prometheus implementation uses a small slice (500 samples) as a concrete data structure and runs <code>Compress</code> immediately after each insert.</p>
+
+<p>The following table shows the algorithm at work on a dataset of 30 samples: shuffled integers from 1 to 30 inclusive.</p>
 
 <p><img src="targeted-quantiles-execution.png" alt="Targeted quantiles execution on a dataset of size 30" /></p>
 
-<p>You can find the script which generated this table <a href="https://github.com/topliceanu/perks/commit/cff191c15ce1991cf393d06813790a736867c61f">in this commit</a>. To make it work, the size of the internal list used in the implementation was reduced from 500 to 10, to better show how <code>Compress</code> works.</p>
+<p>You can find the script which generated this table <a href="https://github.com/topliceanu/perks/commit/cff191c15ce1991cf393d06813790a736867c61f">in this commit</a>.
+To make it work, the size of the internal list used in the implementation was reduced from 500 to 10, to force <code>Compress</code> to prune data.</p>
+
+<p>Notice how, as values are ingested, other values are removed, potentially from other areas of the quantile spectrum, e.g. at <code>Insert 24</code>, <code>2</code> is removed.
+Often times, the new value ingested does not add any new information so it is ignored, e.g. at <code>Insert 7</code>, <code>Insert 1</code>, etc.</p>
 
 <h2 id="observations">Observations</h2>
 
-<p>Because quantile values will shift as more data is consumed, the algorithm has to keep value around to make sure it covers the error constraint. Consequently, the lower the error for a quantile, the more data the algorithm has to store.</p>
+<p>Because quantile values will shift as more data is consumed, the algorithm has to keep the value around to make sure it covers the error constraint.
+Consequently, the lower the allowed error for a quantile, the more data the algorithm has to store.</p>
 
-<p>For example, the 0.5 quantile with a 0.05 error is fine, because most values around the mean will be very similar so there&rsquo;s no point storing more of them. However, for 0.99 quantile the error has to be much smaller to catch the outliers. On the other had, the tail values are much less frequent so the algorithm will not have to store a lot of data.</p>
+<p>For example, the 0.5th quantile with a 0.05 error is acceptable, because most values around the mean will be very similar so there&rsquo;s no point storing more of them.
+However, for the 0.99th quantile the error has to be much smaller to catch the outliers.
+On the other hand, the tail values are much less frequent so the algorithm will not have to store a lot of data.</p>
 
 <p>The algorithm does not sample, that is to say it considers all the input values, but prunes the ones that are not relevant to the objective quantiles.</p>
 
-<p>Space complexity is proportional to the number of quantiles of
-interest, not the size of the input! To keep the data structure small, <code>Compress</code> has to be executed often to prune the values that are not needed. To get the best time complexity, a Red-Black Tree can be used for fast lookups, deletes and range queries.</p>
+<p>Space complexity is proportional to the number of quantiles of interest, not the size of the input!
+To keep the data structure small, <code>Compress</code> has to be executed often to prune the values that are not needed.
+To get the best time complexity, a Red-Black Tree can be used for fast lookups, deletes and range queries.</p>
 
-<p>Two separate data structure instances with the same target quantiles can be merged by simply inserting the values from one into the other and running <code>Compress</code>.</p>
+<p>Two separate instances of the targeted quantile data structure with the same targets can be merged by simply
+inserting the values from one into the other and running <code>Compress</code>.</p>
 
-<h2 id="conclusion">Conclusion</h2>
+<h2 id="afterthought">Afterthought</h2>
 
-<p>Very interesting things occur in resource constrained environments. Tradeoffs have to be made and errors levels have to be accepted to do usefull work. There is a whole category of algorithms suitable for these situations and they prove useful outside of their original context. Targeted quantiles have been developed originally for networking hardware but we use them all the time to monitor our kuberentes deployments. I encourage you to always be curios about how the things you use every day work.</p>
+<p>Interesting solutions are employed in resource-constrained environments. Tradeoffs have to be made and error levels have to be accepted to do any useful work.
+There is a vast category of algorithms suitable for these situations and they prove useful outside of their original context.
+Targeted quantiles have been developed originally for networking hardware but we use them all the time to monitor our Kubernetes deployments.
+I encourage you to try to understand how the tools you often use are designed.</p>
 
 <h2 id="references">References</h2>
 
 <ol>
-<li>The original paper cited in the Prometheus implementation is <a href="https://www.cs.rutgers.edu/~muthu/bquant.pdf">Effective Computation of Biased Quantiles over Data Streams by Cormode et al.</a>. It describes a generic algorithm called Biased Quantiles. It introduces High-Biased, Low-Biased and Targeted Quantiles as specializations. It contains a mathematical prof of correctness and an analysis of the performance characteristics.</li>
-<li>A newer paper from the same research group: <a href="http://dimacs.rutgers.edu/~graham/pubs/papers/bq-pods.pdf">Space- and Time-Efficieng Deterministic Algorithms for Biased Quantiles over Data Streams</a>. It presents an even more generalised algorithm which extends to answering rank queries as well as biased and targeted quantiles.</li>
-<li>The implementation used in the prometheus global client is <a href="https://github.com/beorn7/perks/tree/master/quantile">github.com/beorn7/perks/quantile</a></li>
-<li>The <a href="https://prometheus.io/docs/practices/histograms/#errors-of-quantile-estimation">prometheus documentation</a> for quantile estimation.</li>
+<li>The original paper cited in the Prometheus implementation is <a href="https://www.cs.rutgers.edu/~muthu/bquant.pdf">Effective Computation of Biased Quantiles over Data Streams by Cormode et al.</a>.
+It describes a generic algorithm called Biased Quantiles. It introduces High-Biased, Low-Biased and Targeted Quantiles as specializations.
+It contains a mathematical proof of correctness and an analysis of the performance characteristics.</li>
+<li>A newer paper from the same research group: <a href="http://dimacs.rutgers.edu/~graham/pubs/papers/bq-pods.pdf">Space- and Time-Efficient Deterministic Algorithms for Biased Quantiles over Data Streams</a>.
+This presents an even more generalised algorithm which extends to answering rank queries as well as biased and targeted quantiles.</li>
+<li>The implementation used in the Prometheus global client is <a href="https://github.com/beorn7/perks/tree/master/quantile">github.com/beorn7/perks/quantile</a></li>
+<li>The <a href="https://prometheus.io/docs/practices/histograms/#errors-of-quantile-estimation">Prometheus documentation</a> for quantile estimation.</li>
 </ol>
 
   </div>

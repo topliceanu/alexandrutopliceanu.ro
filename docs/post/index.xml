@@ -18,9 +18,8 @@
       
       <guid>http://alexandrutopliceanu.ro/post/targeted-quantiles/</guid>
       <description>The algorithm behind Prometheus&amp;rsquo; Summaries.
-Abstract TODO
-Introduction The hearthstone of understanding of how your distributed system works in production is monitoring. In recent years, Prometheus has emerged as the most popular monitoring system for applications deployed on Kubernetes. Apart from the more common counters and gauges, the prometheus client exposes the summary metric type. In a go project, it might look like this:
-// This is the definition of a metric which tracks the latency of an RPC request.</description>
+Abstract Prometheus uses a technique called Targeted Quantiles to implement the Summary metric type which is used to monitor distributions, such as latencies. Here, we give an overview of how the algorithm works, we answer why it is so efficient and how to configure Summaries.
+Introduction A very important way of understanding how your distributed system works in production is to monitor it. In recent years, Prometheus has emerged as the most popular monitoring system for applications deployed on Kubernetes.</description>
     </item>
     
     <item>
