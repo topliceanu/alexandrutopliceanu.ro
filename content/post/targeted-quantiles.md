@@ -171,3 +171,7 @@ I encourage you to try to understand how the tools you often use are designed.
   This presents an even more generalised algorithm which extends to answering rank queries as well as biased and targeted quantiles.
 2. The implementation used in the Prometheus global client is [github.com/beorn7/perks/quantile](https://github.com/beorn7/perks/tree/master/quantile)
 4. The [Prometheus documentation](https://prometheus.io/docs/practices/histograms/#errors-of-quantile-estimation) for quantile estimation.
+
+## Comments
+
+Let me know what you think on [Lobsters](https://lobste.rs/s/28drkv/targeted_quantiles_prometheus), [Hacker News](https://news.ycombinator.com/item?id=17122235) or [Twitter](https://twitter.com/topliceanu/status/998684979725991941).
