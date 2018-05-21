@@ -101,6 +101,28 @@ In the above example, the algorithm will produce quantiles in the ranges:
 It is important that the algorithm produces values from the original dataset, rather than aggregates (like a mean or a max), by the definition of a quantile.
 While aggregates are useful, higher abstractions on top of quantiles may use the property that the values were actually observed.
 
+## Intuition
+
+To get an intuition of how the algorithm works, consider the following graph:
+
+![Probability Density Function For Three Quantiles 0.5, 0.9 and 0.99](probability-density-function.png)
+
+It shows three gaussian probability density functions, one for each of the three quantiles:
+
+* 0.5 quantile >> blue with median 50 and variance 10
+* 0.9 quantile >> red with median 90 and variance 5
+* 0.99 quantile >> yellow with median 99 and variance 3
+
+On Ox, there are the numbers 1 to 100 ingested by the algorithm in random order.
+Each point on any of the bell curves represents the probability that the Ox value will be returned by the algorithm when queried for a target quantile.
+
+Because quantile values will shift as more data is consumed, the algorithm has to keep neighbouring values around to make sure it covers the error constraint.
+Consequently, the lower the allowed error for a quantile, the more data the algorithm has to store.
+
+For example, the 0.5th quantile with a 0.05 error is acceptable, because most values around the mean will be very similar so there's no point storing more of them.
+However, for the 0.99th quantile the error has to be much smaller to catch the outliers.
+On the other hand, the tail values are much less frequent so the algorithm will store a lot less data.
+
 ## Algorithm
 
 The abstract data structure employed by the algorithm is a sorted list, with the following operations:
@@ -125,18 +147,11 @@ Often times, the new value ingested does not add any new information so it is ig
 
 ## Observations
 
-Because quantile values will shift as more data is consumed, the algorithm has to keep the value around to make sure it covers the error constraint.
-Consequently, the lower the allowed error for a quantile, the more data the algorithm has to store.
-
-For example, the 0.5th quantile with a 0.05 error is acceptable, because most values around the mean will be very similar so there's no point storing more of them.
-However, for the 0.99th quantile the error has to be much smaller to catch the outliers.
-On the other hand, the tail values are much less frequent so the algorithm will not have to store a lot of data.
-
 The algorithm does not sample, that is to say it considers all the input values, but prunes the ones that are not relevant to the objective quantiles.
 
 Space complexity is proportional to the number of quantiles of interest, not the size of the input!
 To keep the data structure small, `Compress` has to be executed often to prune the values that are not needed.
-To get the best time complexity, a Red-Black Tree can be used for fast lookups, deletes and range queries.
+To get the best time complexity, a Red-Black Tree can be used for fast lookups and deletes.
 
 Two separate instances of the targeted quantile data structure with the same targets can be merged by simply
 inserting the values from one into the other and running `Compress`.
