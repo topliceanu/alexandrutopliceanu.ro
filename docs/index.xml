@@ -6,10 +6,21 @@
     <description>Recent content on alexandru topliceanu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 01 Feb 2018 22:08:22 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 11 Mar 2018 19:25:53 +0000</lastBuildDate>
     
 	<atom:link href="http://alexandrutopliceanu.ro/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Targeted Quantiles in Prometheus</title>
+      <link>http://alexandrutopliceanu.ro/post/targeted-quantiles/</link>
+      <pubDate>Sun, 11 Mar 2018 19:25:53 +0000</pubDate>
+      
+      <guid>http://alexandrutopliceanu.ro/post/targeted-quantiles/</guid>
+      <description>The algorithm behind Prometheus&amp;rsquo; Summaries.
+Abstract Prometheus uses a technique called Targeted Quantiles to implement the Summary metric type which is used to monitor distributions, such as latencies. Here, we give an overview of how the algorithm works, we answer why it is so efficient and how to configure Summaries.
+Introduction A very important way of understanding how your distributed system works in production is to monitor it. In recent years, Prometheus has emerged as the most popular monitoring system for applications deployed on Kubernetes.</description>
+    </item>
     
     <item>
       <title>Scheduling in Kubernetes</title>
