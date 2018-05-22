@@ -1,6 +1,6 @@
 +++
 title = "Targeted Quantiles in Prometheus"
-date = "2018-03-11T19:25:53Z"
+date = "2018-05-21T22:25:53Z"
 draft = false
 +++
 
