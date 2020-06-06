@@ -6,144 +6,321 @@ draft = true
 
 ## Intro
 
-Often in computing we make tradeoffs between time complexity and space complexity.
-Since ephemeral and persistent storage are cheap and plentiful, a solution that
-is faster at the expense of using more memory and more storage is usually preferred.
-One way to trade space for faster execution times is by caching already computed results.
+In computing tradeoffs between time and space complexity often need to be made.
+An solution that is faster at the expense of using more storage is usually preferred.
+One way to make a solution faster is to cache results for expensive operations.
+Since cache capacity is limitted and is usually much smaller than the amount of
+data the algorithm requires, caching evey result is not practical.
+Once the cache memory is at capacity, the caching system needs to decide which
+piece of data to remove so it can make room for new pieces of data.
+This is the cache replacement problem. [1][1]
 
 This article goes through several strategies for cache replacement.
 It's accompanied by example implementations in golang with benchmarks for speed,
-memory usage and cache miss rates.
+memory usage and cache miss rates. [2][2]
 
-## The caching problem
+## The caching replacement problem
 
-We're given two different memory types: a very fast but small memory and a large but much slower one.
-A cache processes a sequences of _page requests_: the client requests data - _pages_ -
-from the cache. Ideally the cache would serve these requests from the fast memory.
-When the data is not already in the cache - what's called a _cache miss_ - the cache
-needs to bring it in from the slow memory. The problem then is which page from
-the fast memory do you evict in order to make room for the newly promoted page?
+Given two types of memory, a fast but small one and a slow but large one,
+the aim is to design a system with the performance of the first and the capacity of the second.
+For both memory types, data is split into addressable chunks of data, called _pages_.
+A storage system transparently builds a cache of page copies from the slow memory in the fast memory.
+When the client requests a page that is in the cache - a _cache hit_, the storage
+system will read the page from the fast memory and return it. Otherwise, in case of
+a _cache miss_, the system will fetch the page from the backend slow memory, write it in the
+fast memory and return it to the client. See _Figure 1.a_.
 
-*IMAGE WITH HOW CACHE MISSES WORK?!?!*
+```
+client       cache        backend          client       cache        backend
+--+---       --+--        ---+---          --+---       --+--        ---+---
+  |            |             |               |            |             |
+  |  read key  | (miss)      |               |  read key  |             |
+  H----------->H             |               H----------->H             |
+  H            H  read key   |               H    miss    H             |
+  H            H------------>H               H<-----------H             |
+  H            H    val      H               H            |             |
+  H            H<------------H               H         read key         |
+  H            H             |               H------------------------->H
+  H    val     H (store val) |               H            |             H
+  H<-----------H             |               H           val            H
+  |            |             |               H<-------------------------H
+                                             H            |             |
+              (a)                            H  write val |             |
+                                             H------------H             |
+                                             H    ok      H             |
+                                             H<-----------H             |
+                                             |            |             |
 
-One thing to note is that the data is guaranteed to be in the large slow memory,
-this is somewhat outside the cache context.
+                                                         (b)
+```
+_Figure 1: a. cache miss in a storage system; b. cache miss in a general system_
 
-The cache replacement problem is the problem of optimally choosing which values
-to cache and how to discard values from the cache that are not used anymore to
-make room for new values.
+The storage system approach couples the cache with the backend storage.
+In a general purpose cache, the pages can come from something other than a slow disk,
+for instance, they can be results of expensive computations or a network calls.
+In this approach, the decision to write pages to the cache is left to the client.
+See _Figure 1.b_.
+
+```
+Read(key int) (value int, isCacheMiss bool)
+Write(key, value int)
+```
+_Listing 1: general purpose cache interface_
+
+In the following sections, this document goes through several cache page replacement strategies.
 
 ## LRU - Least recently used
 
-The observation at the base of LRU is that whatever piece of data was requested
-recently has the highest chance to be requested again in the near future. We say that the data exibits
+The observation at the base of LRU is that whatever page was requested
+recently has the highest chance to be requested again in the near future - the data exibits
 _locallity of reference_. Conversely, the data in the cache that hasn't been
 requested for the longest time, has the least chance of being requested again the near future.
 This is the data that LRU evicts to make room for new pages.
 
-Obviously this depends on the use-case, but, in practice, LRU works well enough
-in many situations.
+Cache performance depends on the use-case, but, in practice, LRU works well enough
+in many situations, it's very fast and easy to implement.
 
-It is implemented with a linked list and a hash map. The hash map give constant lookup
-times for data keys, whereas the linked list maintains the invariant that the nodes
-are sorted by how recent they were last used. Discarding the last used node as well
-as promoting recently accessed keys is as easy as updating a few pointer in constanst time.
+It is implemented with a double-linked list and a hash map.
+The hash map gives constant lookup times for data keys, whereas the list maintains
+the invariant that the nodes that were requested recently are at the head of the list.
+Discarding the last used node as well as promoting recently accessed nodes is
+as easy as updating a few pointers in constanst time.
 
-*IMAGE WITH HOW LRU DOES EVICTION WORKS*
++------+---------------+-----------+------------------------------------------------------+
+| step | state (list)  | operation | effect                                               |
++------+---------------+-----------+------------------------------------------------------+
+| 1    | ()->()->()    | write 3   | add 3 to the empty cache                             |
+| 2    | (3)->()->()   | write 2   | add 2 before 3, capacity not reached                 |
+| 3    | (2)->(3)->()  | write 1   | add 1 before 2, capacity not reached                 |
+| 4    | (1)->(2)->(3) | write 4   | add 4 before 1 and evict 3 since the cache overflowed|
+| 5    | (4)->(1)->(2) | write 5   | add 5 before 4, evit 2 since its the LRU node        |
+| 6    | (5)->(4)->(1) | read 1    | read 1 bumps it to the front of the list, the MRU    |
+| 7    | (1)->(5)->(4) |           |                                                      |
++------+---------------+-----------+------------------------------------------------------+
+_Table 1: an example of operations and their effect of the LRU cache_
 
 ## MRU - Most recently used
 
-While LRU is intuitive why it would work in most cases, when repeatedy scanning
-large pieces of data or accessing random pages in a large memory access patterns happen,
-evicting the most recent accessed key first, has been proven to work better than LRU.
+In the case of repeatedly scanning large pieces of data or accessing random
+pages from a very large memory, LRU does not perform very well.
+It has been proven - see [8][8] - that evicting the most recently used page has better
+cache hit rates in this case.
 
-The implementation is similar to LRU, except that the double linked list is sorted descendingly,
-with the least recenly used page as the head and the most recently used page as the last node.
-
-*IMAGE WITH HOW MRU DOES EVICTION WORKS*
+The implementation is very similar to LRU - the most recently used key is at the head of the list
+and the least recently used key is at the end - except that in MRU, the key that is
+read last - the head of the linked list -  is also the key that is evicted before the next write.
 
 ## LFU - Least frequently used
 
 The intuition for LFU is to evict the page that has been requested the fewest
 times out of all the pages in the cache.
 
-In order to implement this, we will keep the hash map for constant time access to a key,
-but we can't use the double-linked list anymore. We would have to keep the list sorted
-by the number of access requests to each node. For a linked list, that is O(n), where
-n is the lenght of the list. This is too slow for a cache.
+In practice, maintaining the complete history of key accesses is not possible, so
+most implementations use an aproximate LFU (ALFU) where the access history is
+retained for a limitted time window.
 
-Other options to maintain the sorted list of pages are to use a sorted array,
-a binary ballanced search tree or a heap. The heap is an interesting option: it
-is implemented with an array, unlike the ballanced search tree, the extra data needed to
-support the structure is 0, unlike the sorted array, we don't actually need to keep
-all the pages in their right place, we are only interested in the least frequently used page,
-that page has to be fast to remove. Not much else is required from our choice of data structure.
+Much like LRU, this implementation also uses a hash map for fast access to a given key.
+Unlike LRU, LFU needs to maintain a of all the keys in the cache sorted by frequency of access.
+A double-linked list would not work because the list needs to be kept sorted,
+yielding a O(n) complexity on every operation.
 
-In general when picking a data structure, you want something that implements the
-least amount of extra functionality that you don't need, ideally 0, because you
-are going to pay the price for that in the functionality you do need.
+A heap is a good candidate because pages don't need to be strictly sorted by frequency,
+the algorithm only requires the least accessed page for eviction. Writing keys
+as well as reading and promoting keys in a heap takes O(n) in the worst case.
 
-The heap is sorted by the access frequency of the data page. When a page is read from
-the hashmap, the index in the heap is retrieved, the frequency is updated and the node is
-bubble up in the heap data structure for a time complexity of O(logn).
-That is similar to the sorted array or the tree, but in general it will be faster than them,
-but not as fast as LRU.
+In general when choosing a data structure for an algorithm, the goal is to find
+the structure that exposes no more functionality than what is needed.
+Generally speaking, the more extra functionality a data structure has, the more
+expensive its operations are going to be - in both time and space complexity.
 
-Note that the price is high, all reads and writes are not O(logn) so the effectiveness
-of this cache depends a lot on how slow the main memory is and
+To keep things simple, the implementation in the accompanying repository [2][2] only
+takes into account the number of hits, not their frequency.
+This is not accurate, since there is a pathological worst case use-case where a key
+that was requested many times in just one day a year ago is likely to still be in the
+cache even if it hasn't been requested since.
 
-*IMAGE WITH HOW LFU DOES EVICTION WORKS*
++------+---------------------+-----------+--------------------------------------------------------------+
+| step | state (key, freq)   | operation | effect                                                       |
++------+---------------------+-----------+--------------------------------------------------------------+
+| 1    | ()->()->()          | write 3   | add 3 to the empty cache                                     |
+| 2    | (3,1)->()->()       | write 2   | add 2 before 3, capacity not reached                         |
+| 3    | (2,1)->(3,1)->()    | write 1   | add 1 before 2, capacity not reached                         |
+| 4    | (1,1)->(2,1)->(3,1) | read 2    | read 2 bumps its access count to 2, move to back of the heap |
+| 5    | (1,1)->(3,1)->(2,2) | read 1    | read 1 bumps its access count to 2, move to back of the heap |
+| 6    | (3,1)->(2,2)->(1,2) | write 5   | write 5, evicts 3 because its lowest access count            |
+| 7    | (1,2)->(2,2)->(5,1) |           |                                                              |
++------+---------------------+-----------+--------------------------------------------------------------+
+_Table 2: an example of operations and their effect of the LFU cache_
 
-## SLRU - Segmented LRU
+## Scan resistence
 
-This cache data is split into two segments: probation and protected.
-Both the probation and protected segments are LRU caches.
-When promoting a page to the cache, it is first stored in the probation section of the cache.
-For subsequent read of a key in the cache, it is moved in from the probation segment into the protected segment.
-When overflow occurs on the probation segment, the least recently used key
-is removed completely from the cache. When overflow occurs on the protected
-segment, the least recently used key is moved to the probation segment.
+One of the main disadvantage of LRU is that it is not scan resistent.
+To understand this property, consider an LRU cache with a capacity of n pages.
+Over time, the data in the cache will capture the frequency of access to keys:
+more popular keys will be near the front of the linked list, the less popular
+ones to the back.
 
-*IMAGE WITH HOW LFU DOES EVICTION WORKS*
+Consider the case when a client writes a sequence of n all-new pages to cache.
+All the existing values in the cache will be removed and replaced with the recent writes.
+The implicit key access frequency information is lost.
 
-A variation of this eviction strategy is called Least Frequent Recently Used
-which combines a LRU cache for the priviledged section and a LFU for the
-unpriviledged section. This strategy is used in CDNs.
+For a concrete example, a database cache, where table scans are common, must be
+resistent to scans in order to perform well. Reference [11][11] is a blog post
+about how MySQL uses a modified LRU cache that is scan resistent.
+It is similar to SLRU, which we will talk about next.
+
+## SLRU
+
+This cache splits its allocated memory into two LRU segments: probation and protected.
+When a piece of data is written to the cache, it is first stored in the probation section.
+When a key is read from the cache, it is moved to the head of the protected
+segment, irrespective of whether it was located in protected or the probation sections.
+
+When overflow occurs on the probation segment, the evicted key
+is dumped completely from the cache. When overflow occurs on the protected
+segment, the evicted key is moved to the probation segment,
+giving it another chance to be promoted to the protected section with another read in the future.
+
+```
+      #     |    Protected LRU                  Probation LRU    |  Operations
+------------+----------------------------------------------------+----------------------------------------
+     1.     |     -----------                   -------------    | d is evicted from the Protected
+  eviction  |      |a|b|c|d|                     | |x|y|z|t|     | section and it is added into the
+  from      |     --------|--                   --^----------    | head of the Probation section.
+  Probation |             |                       |              |
+            |             +-----------------------+              |
+------------+----------------------------------------------------+-----------------------------------------
+     2.     |     -----------                   -------------    | z is read from the Probation section.
+ hit in     |      | |a|b|c|                     | |x|y|z|t|     | It is moved to the head of Protected.
+ Probation  |     --^-----|--                   --^-----|----    | section. This triggers c to be evicted
+            |       |     +-----------------------+     |        | and moved to the head of Probation.
+            |       +-----------------------------------+        |
+------------+----------------------------------------------------+-----------------------------------------
+     3.     |     -----------                   -------------    | c is read from the Protected section.
+ hit in     |      | |a|b|c|                     | | | | | |     | It is moved to the head of the
+ Protected  |     --^-----|--                   -------------    | Protected section.
+            |       |     |                                      |
+            |       +-----+                                      |
+------------+----------------------------------------------------+-----------------------------------------
+            |
+```
+_Table 3: SLRU data movement under various conditions_
+
+In the event of a scan, it's only the probation section that is flushed.
+Because it keeps keys that were requested at least 2 time separately, the
+protected section can now maintain the implicit frequence information.
+
+This strategy works better when there's a lot of churn on the accessed values.
+The ratio betwen the protected and probation sections can also be a tunable parameter.
+
+## LFRU - Least Frequent Recently Used
+
+Resistance to a single scan proves very useful in the general case, but for databases,
+where table scans are the norm, if two table scans happen one after the other then
+the same problem occurs.
+
+A variation of SLRU is LFRU, or Least Frequent Recently Used.
+It also is split in two sections, this time called privileged (LRU) and unprivileged (LFU).
+The aim is to promote to the priviledged section only the pages that have a
+higher rate of requests, thus filtering out locally popular pages.
+
+When a cache miss occurs, the client will write the data page in the cache. It will be
+stored in the unpriviledged section - a max heap sorted by frequency of access -
+at the back of the heap. Popular items are promoted from
+the unpriviledged section into the LRU privileged section.
 
 ## ARC - Adaptive replacement cache
 
-The idea is to optimize between a LRU and a LFU depending on the
-distribution of input data. Ie. when clients require frequent access to the
-same data, the LFU cache is favored because it is more efficient (in terms
-of higher cache hit rates), otherwise LRU is prefered bacause it offers
-optimal performance in average case.
+Much like SLRU in the previous section, the idea with ARC is to improve on LRU.
+To outperform LRU, an algorithm needs to adapt to the changing workload with
+minimal pre-tuning as well as maintaining LRU's minimal overhead.
 
-Schema:
+ARC outperform LRU by automatically adapting between a frequency and a recency
+cache. ARC continuously adapts the size of each cache depending on the workload.
+It does not use LFU for the frequency section, instead it maintains two LRU lists,
+L1 and L2. L1 holds items that have been requested only once, while L2 hold items
+that were requested at least twice, in a sense, functioning as a frequency cache.
+
+Now for the adaptive part. ARC also maintains two more lists b1 and b2, associated
+with T1 and T2 respectively. Whenever a page is evicted from t1 it is recorded
+in b1. Likewise evictions from t2 are added to b2. B1 and b2 are not part of the
+cache, they only hold metadata of the evicted pages. When more pages are evicted
+from t1 than t2, the cache will rebalance to give more memory to t1 and vice-versa.
+
+```
     . . . [   b1  <-[     t1    <-!->      t2   ]->  b2   ] . . .
-          [ . . . . [ . . . . . . ! . .^. . . . ] . . . . ]
+          [ . . .  l1 . . . . . . ! . .^. . . . l2  . . . ]
                     [   fixed cache size (c)    ]
+```
+_Figure 2. ARC data structure_
 
-Data is split in tow lists: t1 (a LRU cache) and t2 (a LFU cache).
-Originally t1 and t2 have equal size.
-Evicted keys from t1 move into b1 (a LRU cache) with the same size.
-Evicted keys from t2 move to b2 (a LFU cache) with the same size.
-b1 and b2 are called ghosts of t1 and, respectively, t2 and only contain
-keys, not the actual data.
-
-*IMAGE WITH HOW LFU DOES EVICTION WORKS*
+ARC and variants of it are widely used in the industry, most notably ZFS,
+Postgresql and VMWare vSAN.
 
 ## Benchmarks
+
+The performance indicators of the cache are the speed of reads and writes,
+the extra memory used to store the data and the cache hit rate
+(number of hits / total number of requests). The cache hit rate is application specific.
+Readers are encouraged to try multiple cache implementations for their specific
+workload before deciding which variant to use.
+
+Inspired by [3][3], the accompanying implementation [2][2] contains benchmarks
+for all algorithms described above:
+
+```
+$ ./script/benchmark
+goos: linux
+goarch: amd64
+pkg: github.com/topliceanu/cache/benchmark
+BenchmarkCache/cache-lru/Write()-4       3983329     293.0 ns/op     32 B/op     1 allocs/op
+BenchmarkCache/cache-lru/Read()-4       38942666      30.9 ns/op      0 B/op     0 allocs/op
+BenchmarkCache/cache-lfu/Write()-4       5492858     229.0 ns/op     31 B/op     0 allocs/op
+BenchmarkCache/cache-lfu/Read()-4       36854689      30.5 ns/op      0 B/op     0 allocs/op
+BenchmarkCache/cache-mru/Write()-4       5892952     217.0 ns/op     31 B/op     0 allocs/op
+BenchmarkCache/cache-mru/Read()-4      174675004       6.9 ns/op      0 B/op     0 allocs/op
+BenchmarkCache/cache-slru/Write()-4      3704128     339.0 ns/op     32 B/op     1 allocs/op
+BenchmarkCache/cache-slru/Read()-4      16276162      69.6 ns/op      0 B/op     0 allocs/op
+BenchmarkCache/cache-lfru/Write()-4      3918639     316.0 ns/op     32 B/op     1 allocs/op
+BenchmarkCache/cache-lfru/Read()-4      16141981      65.3 ns/op      0 B/op     0 allocs/op
+BenchmarkCache/cache-arc/Write()-4       1901154     634.0 ns/op     65 B/op     2 allocs/op
+BenchmarkCache/cache-arc/Read()-4       12199518      88.9 ns/op      0 B/op     0 allocs/op
+PASS
+ok      github.com/topliceanu/cache/benchmark   19.684s
+```
+_Listing x: Read/Write benchmarks for the cache implementations_
+
+As expected the more complex caches take more time, eg. arc take more than twice the time and memory per op.
+
+Picking the appropriate cache replacement strategy depends on the access distribution
+of data in each application. The accompanying project to this blog post has a tool
+that generates random data and calculates hit and miss rates:
+```
+$ go run cmd/hit-rate/main.go
+Cache type    Hit rate   Miss rate
+ cache-lru    9.990      90.010
+ cache-lfu    9.997      90.003
+ cache-mru    9.993      90.007
+cache-slru    9.934      90.066
+cache-lfru    9.992      90.008
+ cache-arc    9.941      90.059
+```
+
+This test builds up a data set of one million integers, with cardinality of 10000.
+Each instance of a caching algorithm is initialized with 1000 capacity.
+For each of the one million values, are page read is performed, if a cache miss
+is returned then a page write with that value is performed.
 
 ## Conclusion
 
 The perfect cache solution was described by Belady in 1960 and states that the
 best value to discard is the one that you know you are going to need futhest
-in the future. While intuitive, Belady's contribution is to produce a formal prof
-that this indeed the optimal caching algorithm.
-Obviously, it is not possible to implement it. In general, we cannot know when a
-piece of data will be requested. All we have is the historical access patterns.
+in the future. While intuitive, it is not possible to implement it. In general,
+we cannot know when a piece of data will be requested in the future.
+Belady's contribution, however, is to produce a formal prof that this indeed the
+optimal caching algorithm. It's purpose is to act as the ideal benchmark for
+comparison for other implementations.
 
-It's purpose is to act as the ideal benchmark for comparison for other implementations.
 When designing your cache implementation, you want to take into consideration the
 historical data access patterns for your specific use-case, if the extra effort
 to design and implement it is reasonable.
@@ -151,15 +328,22 @@ to design and implement it is reasonable.
 ## End notes
 
 Thank you for getting this far. I hope you learned something new.
+I plan to explore ARC some more and come back with a comprehensive description.
 
 Please leave comments on [Hacker News](), on [Lobste.rs]() or on [Reddit]().
-The source for this blog is on [github.com/topliceanu/alexandrutopliceanu.ro](https://github.com/topliceanu/alexandrutopliceanu.ro),
-I you open an issue or a PR to make improvements, I would very much appreciate it!
+The source for this post is on [github.com/topliceanu/alexandrutopliceanu.ro](https://github.com/topliceanu/alexandrutopliceanu.ro),
+If you open an issue or a PR to make improvements, I would very much appreciate it!
 
 ## Resources
 
-- This Wikipedia page describes a large list of cache replacement strategies. It's beautiful! [link](https://en.wikipedia.org/wiki/Cache_replacement_policies)
-- My Golang implementation for the cache data structures described above [link](https://github.com/topliceanu/cache)
-- For production use, David Pennington made a benchmark to compare different golang cache implementations [link](https://github.com/Xeoncross/go-cache-benchmark)
-- Professor Tim Roughgarden, in his popular MOOC "Introduction to Algorithms, Part 2", has a section where he introduces the caching problem and Belady's ideal cache algorithm. [youtube.com](https://youtu.be/Dh7vmvk9huM)
-- ARC paper [link](https://www.ipvs.uni-stuttgart.de/export/sites/default/ipvs/abteilungen/as/lehre/lehrveranstaltungen/vorlesungen/WS1415/material/ARC.pdf)
+[1]: https://en.wikipedia.org/wiki/Cache_replacement_policies This Wikipedia page describes a large list of cache replacement strategies. It's beautiful!
+[2]: https://github.com/topliceanu/cache My Golang implementation for the cache data structures described above
+[3]: https://github.com/Xeoncross/go-cache-benchmark For production use, David Pennington made a benchmark to compare different golang cache implementations
+[4]: https://youtu.be/Dh7vmvk9huM Professor Tim Roughgarden, in his popular MOOC "Introduction to Algorithms, Part 2", has a section where he introduces the caching problem and Belady's ideal cache algorithm.
+[5]: https://arxiv.org/pdf/1702.04078.pdf LFRU paper
+[6]: https://lrita.github.io/images/posts/datastructure/ARC.pdf Not the original ARC paper but a simplified version written by the same authors
+[7]: https://en.wikipedia.org/wiki/Adaptive_replacement_cache ARC wikipedia page is very good if you want a TL;DR
+[8]: http://code.activestate.com/recipes/576532-adaptive-replacement-cache-in-python/ ARC implementation in python
+[9]: http://www.vldb.org/conf/1985/P127.PDF MRU paper with experimental data of when it perform better than LRU
+[10]: https://pdfs.semanticscholar.org/eacf/df93e03d9dbbbaa2d01250939d9f94fb16a4.pdf Belady's MIN optimal cache paper
+[11]: https://medium.com/@often_weird/what-makes-mysql-lru-cache-scan-resistant-a73364f286d7 Blog post about the techniques used in MySQL to make the cache scan resistent
