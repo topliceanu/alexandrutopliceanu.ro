@@ -6,19 +6,30 @@ languageCode = "en-us"
 publishDir = "docs"
 pygmentsstyle = "bw"
 title = "alexandru topliceanu"
-theme = "black-and-light"
+theme = "kiss"
+Paginate = 10
+enableRobotsTXT = true
 
-[params]
-  sitename = "Alexandru Topliceanu"
-[[menu.main]]
-  name = "Github"
-  url  = "https://github.com/topliceanu"
-[[menu.main]]
-  name = "Twitter"
-  url  = "https://twitter.com/topliceanu"
-[[menu.main]]
-  name = "Email"
-  url  = "mailto:alexandru.topliceanu@gmail.com"
-[[menu.main]]
-  name = "Subscribe"
-  url  = "http://eepurl.com/cCDKev"
+[params.social]
+twitter = "topliceanu"
+github = "topliceanu"
+email = "alexandru.topliceanu@gmail.com"
+linkedin = "alexandrutopliceanu"
+
+[params.social.config]
+platforms = ["github","twitter","email","linkedin"]
+
+
+
+#[params]
+#  sitename = "Alexandru Topliceanu"
+#[[menu.main]]
+#  name = "Github"
+#  url  = "https://github.com/topliceanu"
+#[[menu.main]]
+#  name = "Twitter"
+#  url  = "https://twitter.com/topliceanu"
+#[[menu.main]]
+#  name = "Email"
+#  url  = "mailto:alexandru.topliceanu@gmail.com"
+

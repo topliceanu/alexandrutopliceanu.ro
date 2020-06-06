@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>alexandru topliceanu</title>
@@ -6,10 +6,20 @@
     <description>Recent content on alexandru topliceanu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 21 May 2018 22:25:53 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 22 Apr 2020 11:11:00 +0000</lastBuildDate>
     
 	<atom:link href="http://alexandrutopliceanu.ro/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>The Cache Replacement Problem</title>
+      <link>http://alexandrutopliceanu.ro/post/cache-replacement-problem/</link>
+      <pubDate>Wed, 22 Apr 2020 11:11:00 +0000</pubDate>
+      
+      <guid>http://alexandrutopliceanu.ro/post/cache-replacement-problem/</guid>
+      <description>Intro Tradeoffs between time and space complexity often need to be made in computing. A solution that is faster at the expense of using more storage is usually preferred. One way to make a solution faster is to save the results of expensive operations in a cache for later use.
+Since cache capacity is limited and is usually much smaller than the amount of data the algorithm requires, caching every result is not practical.</description>
+    </item>
     
     <item>
       <title>Targeted Quantiles in Prometheus</title>
@@ -29,7 +39,8 @@ Introduction A very important way of understanding how your distributed system w
       
       <guid>http://alexandrutopliceanu.ro/post/scheduling-in-kubernetes/</guid>
       <description>The importance of understanding the implementation of the tools we use in production every day cannot be underestimated.
-This process informs about the trade-offs engineers made in the implementations. Knowing a tool&amp;rsquo;s strengths and weaknesses helps better design systems on top of it; it exposes potential failure modes and helps debug critical errors when they occur. It also reveals brilliant ideas, tricks, patterns and conventions used in production systems.</description>
+This process informs about the trade-offs engineers made in the implementations. Knowing a tool&amp;rsquo;s strengths and weaknesses helps better design systems on top of it; it exposes potential failure modes and helps debug critical errors when they occur. It also reveals brilliant ideas, tricks, patterns and conventions used in production systems.
+In this post, I will go through the implementation of the default scheduler in Kubernetes (k8s).</description>
     </item>
     
     <item>
