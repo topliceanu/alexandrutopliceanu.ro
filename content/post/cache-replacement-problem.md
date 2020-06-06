@@ -330,9 +330,9 @@ to design and implement it is reasonable.
 Thank you for getting this far. I hope you learned something new.
 I plan to explore ARC some more and come back with a comprehensive description.
 
-Please leave comments on [Hacker News](), on [Lobste.rs]() or on [Reddit]().
+Please leave comments on [Hacker News](https://news.ycombinator.com/item?id=23443183), on [Lobste.rs](https://lobste.rs/s/gwrzsd/cache_replacement_problem) or on [Reddit](https://www.reddit.com/r/programming/comments/gy16lh/the_cache_replacement_problem/).
 
-The source for this post is on [github.com/topliceanu/alexandrutopliceanu.ro](https://github.com/topliceanu/alexandrutopliceanu.ro),
+The source for this post is on [github.com/topliceanu/alexandrutopliceanu.ro](https://github.com/topliceanu/alexandrutopliceanu.ro/blob/master/content/post/cache-replacement-problem.md),
 If you open an issue or a PR to make improvements, I would very much appreciate it!
 
 ## Resources
