@@ -1,434 +1,107 @@
 <!DOCTYPE html>
-<html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="HandheldFriendly" content="True">
-    <meta name="MobileOptimized" content="320">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="no-referrer">
-    <base href="http://alexandrutopliceanu.ro/">
+<html xmlns="http://www.w3.org/1999/xhtml"  lang="en-us">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Scheduling in Kubernetes | alexandru topliceanu</title>
+
+
+
+<link rel="stylesheet" href="http://alexandrutopliceanu.ro/css/style.css"/><link rel="apple-touch-icon" sizes="180x180" href="http://alexandrutopliceanu.ro/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://alexandrutopliceanu.ro/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="http://alexandrutopliceanu.ro/favicon-16x16.png">
+<link rel="manifest" href="http://alexandrutopliceanu.ro/site.webmanifest">
+<link rel="mask-icon" href="http://alexandrutopliceanu.ro/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="canonical" href="http://alexandrutopliceanu.ro/post/scheduling-in-kubernetes/">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+</head>
+<body>
+<section class="section">
+  <div class="container">
+    <nav id="nav-main" class="nav">
+      <div id="nav-name" class="nav-left">
+        <a id="nav-anchor" class="nav-item" href="http://alexandrutopliceanu.ro/">
+          <h1 id="nav-heading" class="title is-4">alexandru topliceanu</h1>
+        </a>
+      </div>
+      <div class="nav-right">
+        <nav id="nav-items" class="nav-item level is-mobile"><a class="level-item" aria-label="github" href='https://github.com/topliceanu'
+            target='_blank' rel='noopener'>
+            <span class="icon">
+              <i class><svg viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
     
-
-    <link rel="dns-prefetch" href="//fonts.googleapis.com/">
-
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Old+Standard+TT:400' rel='stylesheet' type='text/css'>
-
-    <title>
-      
-      
-         Scheduling in Kubernetes 
-      
-    </title>
-    <link rel="canonical" href="http://alexandrutopliceanu.ro/post/scheduling-in-kubernetes/">
-
-    <style>
-  * {
-    border:0;
-    font:inherit;
-    font-size:100%;
-    vertical-align:baseline;
-    margin:0;
-    padding:0;
-    color: black;
-  }
-
-  body {
-    font-family:'Open Sans', 'Myriad Pro', Myriad, sans-serif;
-    font-size:17px;
-    line-height:160%;
-    color:#1d1313;
-    max-width:700px;
-    margin:auto;
-  }
-
-  p {
-    margin: 5px 0 10px 0;
-  }
-
-  a img {
-    border:none;
-  }
-
-  img {
-    margin: 10px auto 10px auto;
-    max-width: 100%;
-    display: block;
-  }
-
-  pre, code {
-    font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
-    background-color: #f7f7f7;
-  }
-
-  code {
-    font-size: 12px;
-    padding: 4px;
-  }
-
-  pre {
-    margin-top: 0;
-    margin-bottom: 16px;
-    word-wrap: normal;
-    padding: 16px;
-    overflow: auto;
-    font-size: 85%;
-    line-height: 1.45;
-  }
-
-  pre>code {
-    padding: 0;
-    margin: 0;
-    font-size: 100%;
-    word-break: normal;
-    white-space: pre;
-    background: transparent;
-    border: 0;
-  }
-
-  pre code {
-    display: inline;
-    max-width: auto;
-    padding: 0;
-    margin: 0;
-    overflow: visible;
-    line-height: inherit;
-    word-wrap: normal;
-    background-color: transparent;
-    border: 0;
-  }
-
-  pre code::before,
-  pre code::after {
-    content: normal;
-  }
-
-  em,q,em,dfn {
-    font-style:italic;
-  }
-
-  .sans,html .gist .gist-file .gist-meta {
-    font-family:"Open Sans","Myriad Pro",Myriad,sans-serif;
-  }
-
-  .mono,pre,code,tt,p code,li code {
-    font-family:Menlo,Monaco,"Andale Mono","lucida console","Courier New",monospace;
-  }
-
-  .heading,.serif,h1,h2,h3 {
-    font-family:"Old Standard TT",serif;
-  }
-
-  strong {
-    font-weight:600;
-  }
-
-  q:before {
-    content:"\201C";
-  }
-
-  q:after {
-    content:"\201D";
-  }
-
-  del,s {
-    text-decoration:line-through;
-  }
-
-  blockquote {
-    font-family:"Old Standard TT",serif;
-    text-align:center;
-    padding:50px;
-  }
-
-  blockquote p {
-    display:inline-block;
-    font-style:italic;
-  }
-
-  blockquote:before,blockquote:after {
-    font-family:"Old Standard TT",serif;
-    content:'\201C';
-    font-size:35px;
-    color:#403c3b;
-  }
-
-  blockquote:after {
-    content:'\201D';
-  }
-
-  hr {
-    width:40%;
-    height: 1px;
-    background:#403c3b;
-    margin: 25px auto;
-  }
-
-  h1 {
-    font-size:35px;
-  }
-
-  h2 {
-    font-size:28px;
-  }
-
-  h3 {
-    font-size:22px;
-    margin-top:18px;
-  }
-
-  h1 a,h2 a,h3 a {
-    text-decoration:none;
-  }
-
-  h1,h2 {
-    margin-top:28px;
-  }
-
-  #sub-header, time {
-    color:#403c3b;
-    font-size:13px;
-  }
-
-  #sub-header {
-    margin: 0 4px;
-  }
-
-  #nav h1 a {
-    font-size:35px;
-    color:#1d1313;
-    line-height:120%;
-  }
-
-  .posts_listing a,#nav a {
-    text-decoration: none;
-  }
-
-  li {
-    margin-left: 20px;
-  }
-
-  ul li {
-    margin-left: 5px;
-  }
-
-  ul li {
-    list-style-type: none;
-  }
-  ul li:before {
-    content:"\00BB \0020";
-  }
-
-  #nav ul li:before, .posts_listing li:before {
-    content:'';
-    margin-right:0;
-  }
-
-  #content {
-    text-align:left;
-    width:100%;
-    font-size:15px;
-    padding:60px 0 80px;
-  }
-
-  #content h1,#content h2 {
-    margin-bottom:5px;
-  }
-
-  #content h2 {
-    font-size:25px;
-  }
-
-  #content .entry-content {
-    margin-top:15px;
-  }
-
-  #content time {
-    margin-left:3px;
-  }
-
-  #content h1 {
-    font-size:30px;
-  }
-
-  .highlight {
-    margin: 10px 0;
-  }
-
-  .posts_listing {
-    margin:0 0 50px;
-  }
-
-  .posts_listing li {
-    margin:0 0 25px 15px;
-  }
-
-  .posts_listing li a:hover,#nav a:hover {
-    text-decoration: underline;
-  }
-
-  #nav {
-    text-align:center;
-    position:static;
-    margin-top:60px;
-  }
-
-  #nav ul {
-    display: table;
-    margin: 8px auto 0 auto;
-  }
-
-  #nav li {
-    list-style-type:none;
-    display:table-cell;
-    font-size:15px;
-    padding: 0 20px;
-  }
-
-  #links {
-    margin: 50px 0 0 0;
-  }
-
-  #links :nth-child(2) {
-    float:right;
-  }
-
-  #not-found {
-    text-align: center;
-  }
-
-  #not-found a {
-    font-family:"Old Standard TT",serif;
-    font-size: 200px;
-    text-decoration: none;
-    display: inline-block;
-    padding-top: 225px;
-  }
-
-  @media (max-width: 750px) {
-    body {
-      padding-left:20px;
-      padding-right:20px;
-    }
-
-    #nav h1 a {
-      font-size:28px;
-    }
-
-    #nav li {
-      font-size:13px;
-      padding: 0 15px;
-    }
-
-    #content {
-      margin-top:0;
-      padding-top:50px;
-      font-size:14px;
-    }
-
-    #content h1 {
-      font-size:25px;
-    }
-
-    #content h2 {
-      font-size:22px;
-    }
-
-    .posts_listing li div {
-      font-size:12px;
-    }
-  }
-
-  @media (max-width: 400px) {
-    body {
-      padding-left:20px;
-      padding-right:20px;
-    }
-
-    #nav h1 a {
-      font-size:22px;
-    }
-
-    #nav li {
-      font-size:12px;
-      padding: 0 10px;
-    }
-
-    #content {
-      margin-top:0;
-      padding-top:20px;
-      font-size:12px;
-    }
-
-    #content h1 {
-      font-size:20px;
-    }
-
-    #content h2 {
-      font-size:18px;
-    }
-
-    .posts_listing li div{
-      font-size:12px;
-    }
-  }
-</style>
-
-
-    <link rel="shortcut icon" href="http://alexandrutopliceanu.ro/favicon.ico">
-
+    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
     
-  </head>
+  </svg></i>
+            </span>
+          </a><a class="level-item" aria-label="twitter" href='https://twitter.com/topliceanu'
+            target='_blank' rel='noopener'>
+            <span class="icon">
+              <i class><svg viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+    
+    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+    
+  </svg></i>
+            </span>
+          </a><a class="level-item" aria-label="email" href='mailto:alexandru.topliceanu@gmail.com'
+            target='_blank' rel='noopener'>
+            <span class="icon">
+              <i class><svg viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+    
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+    <polyline points="22,6 12,13 2,6"/>
+    
+  </svg></i>
+            </span>
+          </a><a class="level-item" aria-label="linkedin" href='https://linkedin.com/in/alexandrutopliceanu'
+            target='_blank' rel='noopener'>
+            <span class="icon">
+              <i class><svg viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+    
+    <path stroke-width="1.8" d="m5.839218,4.101561c0,1.211972 -0.974141,2.194011 -2.176459,2.194011s-2.176459,-0.982039 -2.176459,-2.194011c0,-1.211094 0.974141,-2.194011 2.176459,-2.194011s2.176459,0.982917 2.176459,2.194011zm0.017552,3.94922l-4.388022,0l0,14.04167l4.388022,0l0,-14.04167zm7.005038,0l-4.359939,0l0,14.04167l4.360816,0l0,-7.370999c0,-4.098413 5.291077,-4.433657 5.291077,0l0,7.370999l4.377491,0l0,-8.89101c0,-6.915523 -7.829986,-6.66365 -9.669445,-3.259423l0,-1.891237z"/>
+    
+  </svg></i>
+            </span>
+          </a></nav>
+      </div>
+    </nav>
 
-  <body>
-    <section id=nav>
-      <h1><a href="http://alexandrutopliceanu.ro/">Alexandru Topliceanu</a></h1>
-      <ul>
-        
-          <li><a href="mailto:alexandru.topliceanu@gmail.com">Email</a></li>
-        
-          <li><a href="https://github.com/topliceanu">Github</a></li>
-        
-          <li><a href="http://eepurl.com/cCDKev">Subscribe</a></li>
-        
-          <li><a href="https://twitter.com/topliceanu">Twitter</a></li>
-        
-      </ul>
-    </section>
+    <nav class="nav">
+      
 
+      
+    </nav>
 
-<section id=content>
-  <h1> Scheduling in Kubernetes </h1>
-
-  <div id=sub-header>
-    February 2018 · 7 minute read
   </div>
-
-  <div class="entry-content">
+  <script src="http://alexandrutopliceanu.ro/js/navicon-shift.js"></script>
+</section>
+<section class="section">
+  <div class="container">
+    <div class="subtitle tags is-6 is-pulled-right">
+      
+    </div>
+    <h2 class="subtitle is-6">February 1, 2018</h2>
+    <h1 class="title">Scheduling in Kubernetes</h1>
     
-
-<p>The importance of understanding the implementation of the tools we use in
+    <div class="content">
+      <p>The importance of understanding the implementation of the tools we use in
 production every day cannot be underestimated.</p>
-
 <p>This process informs about the trade-offs engineers made in the implementations.
 Knowing a tool&rsquo;s strengths and weaknesses helps better design systems on top
 of it; it exposes potential failure modes and helps debug critical errors when
 they occur. It also reveals brilliant ideas, tricks, patterns and conventions used in
 production systems.</p>
-
 <p>In this post, I will go through the implementation of the default scheduler in
 Kubernetes (k8s).
 Although k8s has a large set of features, tending towards a full-blown PaaS,
 at it’s core, k8s is a cluster scheduler, that is to say, it schedules work
 (pods) onto computing resources (nodes).</p>
-
 <h2 id="the-genericscheduler">The genericScheduler</h2>
-
 <p>K8s has different mechanisms to control pod scheduling: node/pod affinity/anti-affinity,
 taints, tolerations and it also has support for custom schedulers.
 I will look at how all these options factor into the default scheduling process.</p>
-
 <p>The core abstraction for the scheduler in k8s is called <code>genericScheduler</code>.
 If you clone <a href="https://github.com/kubernetes/kubernetes">github.com/kubernetes/kubernetes</a>
 master, you can find it in <a href="https://github.com/kubernetes/kubernetes/blob/master/pkg/scheduler/core/generic_scheduler.go">pkg/scheduler/core/generic_scheduler.go</a>.
@@ -436,73 +109,66 @@ The main method of this structure is called <code>Schedule</code>, which
 functions as a <a href="https://en.wikipedia.org/wiki/Template_method_pattern">template method pattern</a>,
 ie. different implementations can modify specific steps, but the order in which
 these steps are executed remains fixed.</p>
-
 <p>Here is the <code>Schedule</code> method without logging and instrumentation:</p>
-
-<pre><code class="language-golang">// Schedule tries to schedule the given pod to one of node in the node list.
-// If it succeeds, it will return the name of the node.
-// If it fails, it will return a Fiterror error with reasons.
-func (g *genericScheduler) Schedule(pod *v1.Pod, nodeLister algorithm.NodeLister) (string, error) {
-    if err := podPassesBasicChecks(pod, g.pvcLister); err != nil {
-        return &quot;&quot;, err
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="font-style:italic">// Schedule tries to schedule the given pod to one of node in the node list.
+</span><span style="font-style:italic">// If it succeeds, it will return the name of the node.
+</span><span style="font-style:italic">// If it fails, it will return a Fiterror error with reasons.
+</span><span style="font-style:italic"></span><span style="font-weight:bold">func</span> (g *genericScheduler) Schedule(pod *v1.Pod, nodeLister algorithm.NodeLister) (<span style="">string</span>, <span style="">error</span>) {
+    <span style="font-weight:bold">if</span> err := podPassesBasicChecks(pod, g.pvcLister); err != <span style="font-weight:bold">nil</span> {
+        <span style="font-weight:bold">return</span> <span style="font-style:italic">&#34;&#34;</span>, err
     }
 
     nodes, err := nodeLister.List()
-    if err != nil {
-        return &quot;&quot;, err
+    <span style="font-weight:bold">if</span> err != <span style="font-weight:bold">nil</span> {
+        <span style="font-weight:bold">return</span> <span style="font-style:italic">&#34;&#34;</span>, err
     }
-    if len(nodes) == 0 {
-        return &quot;&quot;, ErrNoNodesAvailable
+    <span style="font-weight:bold">if</span> len(nodes) == 0 {
+        <span style="font-weight:bold">return</span> <span style="font-style:italic">&#34;&#34;</span>, ErrNoNodesAvailable
     }
 
-    // Used for all fit and priority funcs.
-    err = g.cache.UpdateNodeNameToInfoMap(g.cachedNodeInfoMap)
-    if err != nil {
-        return &quot;&quot;, err
+    <span style="font-style:italic">// Used for all fit and priority funcs.
+</span><span style="font-style:italic"></span>    err = g.cache.UpdateNodeNameToInfoMap(g.cachedNodeInfoMap)
+    <span style="font-weight:bold">if</span> err != <span style="font-weight:bold">nil</span> {
+        <span style="font-weight:bold">return</span> <span style="font-style:italic">&#34;&#34;</span>, err
     }
 
     filteredNodes, failedPredicateMap, err := findNodesThatFit(pod, g.cachedNodeInfoMap, nodes, g.predicates, g.extenders, g.predicateMetaProducer, g.equivalenceCache, g.schedulingQueue)
-    if err != nil {
-        return &quot;&quot;, err
+    <span style="font-weight:bold">if</span> err != <span style="font-weight:bold">nil</span> {
+        <span style="font-weight:bold">return</span> <span style="font-style:italic">&#34;&#34;</span>, err
     }
 
-    if len(filteredNodes) == 0 {
-        return &quot;&quot;, &amp;FitError{
+    <span style="font-weight:bold">if</span> len(filteredNodes) == 0 {
+        <span style="font-weight:bold">return</span> <span style="font-style:italic">&#34;&#34;</span>, &amp;FitError{
             Pod:              pod,
             NumAllNodes:      len(nodes),
             FailedPredicates: failedPredicateMap,
         }
     }
 
-    // When only one node after predicate, just use it.
-    if len(filteredNodes) == 1 {
-        return filteredNodes[0].Name, nil
+    <span style="font-style:italic">// When only one node after predicate, just use it.
+</span><span style="font-style:italic"></span>    <span style="font-weight:bold">if</span> len(filteredNodes) == 1 {
+        <span style="font-weight:bold">return</span> filteredNodes[0].Name, <span style="font-weight:bold">nil</span>
     }
 
     metaPrioritiesInterface := g.priorityMetaProducer(pod, g.cachedNodeInfoMap)
     priorityList, err := PrioritizeNodes(pod, g.cachedNodeInfoMap, metaPrioritiesInterface, g.prioritizers, filteredNodes, g.extenders)
-    if err != nil {
-        return &quot;&quot;, err
+    <span style="font-weight:bold">if</span> err != <span style="font-weight:bold">nil</span> {
+        <span style="font-weight:bold">return</span> <span style="font-style:italic">&#34;&#34;</span>, err
     }
 
-    trace.Step(&quot;Selecting host&quot;)
-    return g.selectHost(priorityList)
+    trace.Step(<span style="font-style:italic">&#34;Selecting host&#34;</span>)
+    <span style="font-weight:bold">return</span> g.selectHost(priorityList)
 }
-</code></pre>
-
-<p>K8s schedules pods on a first come, first served order. It forms a queue of all
+</code></pre></div><p>K8s schedules pods on a first come, first served order. It forms a queue of all
 the requests to schedule pods and processes them one by one. At this point, there
 is no concurrency which makes the code simpler. I’ll show later how k8s makes
 the process fast.</p>
-
 <h2 id="volumes">Volumes</h2>
-
 <p>The first thing that happens is a call to <code>podPassesBasicChecks()</code>. Despite the
 complicated sounding name, at the time of writing, this method makes sure that
 all the PersistentVolumeClaims (PVCs) defined by the pod are ready to be used,
 that is they have each been bound to a PersistentVolume (PV) and they are not
 being deleted.</p>
-
 <p>In k8s, nodes represent compute resources and pods consume those compute resources.
 PVs are similar to nodes, but they represent disk resources available to the cluster.
 Conceptually, they map to physical disks in the same way nodes maps to machine, of course,
@@ -510,37 +176,28 @@ in reality, there are layers of virtualization in between.
 PVs are defined by the administrators of the cluster, while PVCs are
 defined by the users of the cluster, the service developers.
 Each PVC needs to bind to a PV in order for the containers to use the storage.</p>
-
 <h2 id="algorithm">Algorithm</h2>
-
 <p>Next up, the algorithm makes sure the list of available nodes is not empty!</p>
-
 <p>I mentioned before that although pod scheduling requests are processed one by one,
 k8s makes great effort to make this efficient, including caching and concurrent
 execution. One of the pieces of data to be cached is the nodes&rsquo; specs. It is reasonable
 to assume that node information will not change often between successive runs of Schedule,
 so it is cached and updated in <code>UpdateNodeNameToInfo()</code>.</p>
-
 <p>K8s picks the most appropriate node out of the list of candidates in two steps: predicates and filters.</p>
-
-<p><img src="funnel.png" alt="Filtering the nodes in stages" /></p>
-
+<p><img src="funnel.png" alt="Filtering the nodes in stages"></p>
 <h3 id="predicates">Predicates</h3>
-
 <p>Predicates are pure functions which take a node and a pod and return a boolean
 whether that pod fits onto the node or not. Predicates are meant to be fast and
 should eliminate all the nodes that can’t fit the pod. Predicates are of type
 <a href="https://godoc.org/k8s.io/kubernetes/pkg/scheduler/algorithm#FitPredicate">algorithm.FitPredicate</a>
 and model concepts like available resources, taints and tolerations, volume
 availability, memory and disk pressure on the node, etc.</p>
-
 <p>This is done in the call to <code>findNodesThatFit()</code>. This method executes all
 predicates on all the available nodes. Because this step is CPU intensive,
 but also, because the predicates are independent of each other, it runs
 concurrently on 16 goroutines using the <a href="https://godoc.org/k8s.io/client-go/util/workqueue#Parallelize">workqueue.Parallelize</a>
 framework. This is the order in which they are executed by default (<a href="https://github.com/kubernetes/kubernetes/blob/master/pkg/scheduler/algorithm/predicates/predicates.go#L102-L115">source</a>]):</p>
-
-<pre><code class="language-golang">[]string{
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang">[]<span style="">string</span>{
   CheckNodeConditionPred,
   GeneralPred,
   HostNamePred,
@@ -561,13 +218,9 @@ framework. This is the order in which they are executed by default (<a href="htt
   CheckNodeDiskPressurePred,
   MatchInterPodAffinityPred,
 }
-</code></pre>
-
-<p>One question that comes to mind: Why is the PVCs check also done at the beginning
+</code></pre></div><p>One question that comes to mind: Why is the PVCs check also done at the beginning
 if it’s done here as a predicate? It might be for efficiency reasons.</p>
-
 <h3 id="priorities">Priorities</h3>
-
 <p>Priorities, much like predicates, take a node and a pod but instead of a binary
 value, return a <em>“score”</em>, an integer between 1 and 10. This step is called
 filtering and is where the algorithm ranks all the nodes to find the best one
@@ -575,15 +228,12 @@ suited for the pod.
 This is done in the <code>PrioritizeNodes()</code> method and also runs concurrently on
 16 goroutines and uses cached data. The scores are also weighted by the importance
 of each priority function.</p>
-
 <p>Finally, all the scores for a node are added to a final score per node. Then, nodes are
 sorted by this final score in a priority queue (heap) which is returned by
 <code>PrioritizeNodes()</code>.</p>
-
-<p>Priorities implement [algorithm.PriorityConfig]() and are located in the
+<p>Priorities implement <a href="">algorithm.PriorityConfig</a> and are located in the
 <a href="https://github.com/kubernetes/kubernetes/tree/master/pkg/scheduler/algorithm/priorities">src/scheduler/algorithm/priorities</a>.
 Here is a list with some of them:</p>
-
 <pre><code>├──alanced_resource_allocation.go
 ├──mage_locality.go
 ├──nterpod_affinity.go
@@ -596,87 +246,79 @@ Here is a list with some of them:</p>
 ├──resource_limits.go
 ├──selector_spreading.go
 └──taint_toleration.go
-</code></pre>
-
-<p>At first glance, most priorities seem to do the same as predicates.
+</code></pre><p>At first glance, most priorities seem to do the same as predicates.
 However, predicates are designed to dismiss a node which is incapable of running the pod,
 while priorities are designed to rank all the nodes that <em>can</em> run the pod.
 For instance, given a pod which requires 500 millicpu, a resource predicate will return
 false for a node which only has 300 millicpu left. For the same pod, a priority
 function will return a higher score for a node which has 25000millicpu than for one
 which has 800millicpu left, even though both can accommodate the pod.</p>
-
 <p>The use of concurrency in order to compute the predicates and the scores makes sense,
 one question that I have is why is this hardcoded to 16 workers? I would expect
 that tuning this value would be helpful, for instance in large clusters which run
 the k8s master on powerful hardware. It may be that the yield is not significant.</p>
-
 <h2 id="node-selection">Node Selection</h2>
-
 <p>The final step is <code>selectHost()</code> which pops the top nodes from the priority queue.
 If multiple nodes have the same score, this method picks one node in a round-robin
 manner and returns it. In turn, <code>Schedule()</code> will return the picked node.</p>
-
 <h2 id="custom-scheduler">Custom Scheduler</h2>
-
 <p>All pods in k8s are, by default, scheduled using this algorithm.
 Pod objects have metadata, spec and status. In a scheduled pod’s resolved status,
 there is the field: <code>&quot;scheulderName&quot;: &quot;defaultScheduler&quot;</code>.</p>
-
 <p>You can implement your own scheduler and rebuild k8s with it. Schedulers need to
 implement the <a href="https://github.com/kubernetes/kubernetes/blob/master/pkg/scheduler/algorithm/scheduler_interface.go#L46-L61">algorithm.ScheduleAlgorithm</a>.</p>
-
 <p>K8s also supports the use of custom schedulers as separate processes.
 A custom scheduler runs like a normal deployment in k8s, where it is managed
 by the default scheduler. A custom scheduler, let&rsquo;s call it <code>my-scheduler</code>,
 will pick up all the pods which have <code>&quot;schedulerName&quot;: &quot;my-scheduler&quot;</code> in their object spec.</p>
-
 <p>You can learn more about this option in these two blog posts:
 <a href="http://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html">here</a>
 and <a href="https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/">here</a>.</p>
-
 <p>A question whose answer is not clear immediately from the code is how do multiple
 schedulers coordinate. A scheduler needs to know which resources it has available
 to assign pods to. If there’s another scheduler competing for the same resources,
 how does k8s prevent over-scheduling the nodes!?</p>
-
 <h2 id="conclusion">Conclusion</h2>
-
 <p>K8s&rsquo; implementation of the generic scheduler, with it&rsquo;s FIFO logic, suggests that
 it is optimized for long-running processes, such in a microservice architecture,
 which is where k8s is very popular at the moment. If the workload
 contains a lot of small and short jobs (eg. a serverless infrastructure) then
 the generic scheduler will probably not be very efficient because of the FIFO
 architecture.</p>
-
 <p>In future blog posts, I will try to answer some of the questions left unanswered in
 this post and continue my exploration of the k8s codebase.</p>
-
 <p>Let me know what you think in the comments sections on <a href="https://lobste.rs/s/pjw6k9/scheduling_kubernetes">lobste.rs</a> or <a href="https://news.ycombinator.com/item?id=16304577">hacker news</a>.</p>
 
-  </div>
-
-  <div id=links>
-    
-      <a class="basic-alignment left" href="http://alexandrutopliceanu.ro/post/introduction-to-graphql/">&laquo; [video] Introduction to GraphQL</a>
-    
-    
-      <a class="basic-alignment left" href="http://alexandrutopliceanu.ro/post/targeted-quantiles/">Targeted Quantiles in Prometheus &raquo;</a>
+      
+    </div>
     
   </div>
 </section>
 
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+    
   </div>
-  
-<script>
-window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-ga('create', 'UA-24987736-1', 'auto');
-ga('send', 'pageview');
+</section>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-24987736-1', 'auto');
+	
+	ga('send', 'pageview');
+}
 </script>
-<script async src='//www.google-analytics.com/analytics.js'></script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
 
 </body>
 </html>
-
-
 

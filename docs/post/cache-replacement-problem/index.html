@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  lang="en-us">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>The Cache Replacement Problem | alexandru topliceanu</title>
+
+
+
+<link rel="stylesheet" href="http://alexandrutopliceanu.ro/css/style.css"/><link rel="apple-touch-icon" sizes="180x180" href="http://alexandrutopliceanu.ro/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://alexandrutopliceanu.ro/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="http://alexandrutopliceanu.ro/favicon-16x16.png">
+<link rel="manifest" href="http://alexandrutopliceanu.ro/site.webmanifest">
+<link rel="mask-icon" href="http://alexandrutopliceanu.ro/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="canonical" href="http://alexandrutopliceanu.ro/post/cache-replacement-problem/">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+</head>
+<body>
+<section class="section">
+  <div class="container">
+    <nav id="nav-main" class="nav">
+      <div id="nav-name" class="nav-left">
+        <a id="nav-anchor" class="nav-item" href="http://alexandrutopliceanu.ro/">
+          <h1 id="nav-heading" class="title is-4">alexandru topliceanu</h1>
+        </a>
+      </div>
+      <div class="nav-right">
+        <nav id="nav-items" class="nav-item level is-mobile"><a class="level-item" aria-label="github" href='https://github.com/topliceanu'
+            target='_blank' rel='noopener'>
+            <span class="icon">
+              <i class><svg viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+    
+    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+    
+  </svg></i>
+            </span>
+          </a><a class="level-item" aria-label="twitter" href='https://twitter.com/topliceanu'
+            target='_blank' rel='noopener'>
+            <span class="icon">
+              <i class><svg viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+    
+    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+    
+  </svg></i>
+            </span>
+          </a><a class="level-item" aria-label="email" href='mailto:alexandru.topliceanu@gmail.com'
+            target='_blank' rel='noopener'>
+            <span class="icon">
+              <i class><svg viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+    
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+    <polyline points="22,6 12,13 2,6"/>
+    
+  </svg></i>
+            </span>
+          </a><a class="level-item" aria-label="linkedin" href='https://linkedin.com/in/alexandrutopliceanu'
+            target='_blank' rel='noopener'>
+            <span class="icon">
+              <i class><svg viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+    
+    <path stroke-width="1.8" d="m5.839218,4.101561c0,1.211972 -0.974141,2.194011 -2.176459,2.194011s-2.176459,-0.982039 -2.176459,-2.194011c0,-1.211094 0.974141,-2.194011 2.176459,-2.194011s2.176459,0.982917 2.176459,2.194011zm0.017552,3.94922l-4.388022,0l0,14.04167l4.388022,0l0,-14.04167zm7.005038,0l-4.359939,0l0,14.04167l4.360816,0l0,-7.370999c0,-4.098413 5.291077,-4.433657 5.291077,0l0,7.370999l4.377491,0l0,-8.89101c0,-6.915523 -7.829986,-6.66365 -9.669445,-3.259423l0,-1.891237z"/>
+    
+  </svg></i>
+            </span>
+          </a></nav>
+      </div>
+    </nav>
+
+    <nav class="nav">
+      
+
+      
+    </nav>
+
+  </div>
+  <script src="http://alexandrutopliceanu.ro/js/navicon-shift.js"></script>
+</section>
+<section class="section">
+  <div class="container">
+    <div class="subtitle tags is-6 is-pulled-right">
+      
+    </div>
+    <h2 class="subtitle is-6">April 22, 2020</h2>
+    <h1 class="title">The Cache Replacement Problem</h1>
+    
+    <div class="content">
+      <h2 id="intro">Intro</h2>
+<p>Tradeoffs between time and space complexity often need to be made in computing.
+A solution that is faster at the expense of using more storage is usually preferred.
+One way to make a solution faster is to save the results of expensive operations in a cache for later use.</p>
+<p>Since cache capacity is limited and is usually much smaller than the amount of
+data the algorithm requires, caching every result is not practical.
+Once the allocated memory is at capacity, the caching system needs to decide which
+piece of data to remove so it can make room for new pieces of data.
+This is the cache replacement problem. <a href="https://en.wikipedia.org/wiki/Cache_replacement_policies" title="This Wikipedia page describes a large list of cache replacement strategies. It's beautiful!">1</a></p>
+<p>This article goes through several strategies for cache replacement.
+It&rsquo;s accompanied by an example implementation in Golang, as well as benchmarks for speed, memory usage and cache hit rates. <a href="https://github.com/topliceanu/cache" title="My Golang implementation for the cache data structures described above">2</a></p>
+<h2 id="the-cache-replacement-problem">The cache replacement problem</h2>
+<p>Given two types of memory, a fast but small one and a slow but large one,
+the aim is to design a system that exposes the performance of the first and the capacity of the second.
+For both memory types, data is split into addressable chunks of data, called <em>pages</em>.
+The system transparently maintains a cache in the fast memory with copies of pages from the slow memory.</p>
+<p>When the client requests a page that is in the cache - a <em>cache hit</em>, the
+system will read the page from the fast memory and return it. Otherwise, in case of
+a <em>cache miss</em>, the system will fetch the page from the backend slow memory, write it in the
+fast memory and return it to the client. See <em>Figure 1.a</em>.</p>
+<pre><code>`client       cache        backend          client       cache        backend
+--+---       --+--        ---+---          --+---       --+--        ---+---
+  |            |             |               |            |             |
+  |  read key  | (miss)      |               |  read key  |             |
+  H-----------&gt;H             |               H-----------&gt;H             |
+  H            H  read key   |               H    miss    H             |
+  H            H------------&gt;H               H&lt;-----------H             |
+  H            H    val      H               H            |             |
+  H            H&lt;------------H               H         read key         |
+  H            H             |               H-------------------------&gt;H
+  H    val     H (store val) |               H            |             H
+  H&lt;-----------H             |               H           val            H
+  |            |             |               H&lt;-------------------------H
+                                             H            |             |
+              (a)                            H  write val |             |
+                                             H------------H             |
+                                             H    ok      H             |
+                                             H&lt;-----------H             |
+                                             |            |             |
+
+                                                         (b)
+</code></pre><p><em>Figure 1: a. cache miss in a storage system; b. cache miss in a general system</em></p>
+<p>The storage system approach couples the cache with the backend storage.
+In a general-purpose cache, the pages can come from something other than a slow disk,
+for instance, they can be results of expensive computations or network calls.
+In this approach, the decision to write pages to the cache is left to the client.
+See <em>Figure 1.b</em>.</p>
+<pre><code>Read(key int) (value int, isCacheMiss bool)
+Write(key, value int)
+</code></pre><p><em>Listing 1: general purpose cache interface</em></p>
+<p>In the following sections, this document goes through several cache page replacement strategies.</p>
+<h2 id="lru---least-recently-used">LRU - Least recently used</h2>
+<p>The observation at the base of LRU is that whatever page was requested
+recently has the highest chance to be requested again soon - the data exhibits
+<em>locality of reference</em>. Conversely, the data in the cache that hasn&rsquo;t been
+requested for the longest time, has the least chance of being requested again shortly.
+This is the data that LRU evicts to make room for new pages.</p>
+<p>Cache performance depends on the use-case, but, in practice, LRU works well enough
+in many situations as well as being very fast and easy to implement.</p>
+<p>It is implemented with a double-linked list and a hash map.
+The hash map gives constant lookup times for data keys, whereas the list maintains
+the invariant that the nodes that were requested recently are at the head of the list.
+Discarding old node as well as promoting recent nodes is as easy as updating a few
+pointers in constant time.</p>
+<pre><code>+------+---------------+-----------+------------------------------------------------------+
+| step | state (list)  | operation | effect                                               |
++------+---------------+-----------+------------------------------------------------------+
+| 1    | ()-&gt;()-&gt;()    | write 3   | add 3 to the empty cache                             |
+| 2    | (3)-&gt;()-&gt;()   | write 2   | add 2 before 3, capacity not reached                 |
+| 3    | (2)-&gt;(3)-&gt;()  | write 1   | add 1 before 2, capacity not reached                 |
+| 4    | (1)-&gt;(2)-&gt;(3) | write 4   | add 4 before 1 and evict 3 since the cache overflowed|
+| 5    | (4)-&gt;(1)-&gt;(2) | write 5   | add 5 before 4, evict 2 since its the LRU node       |
+| 6    | (5)-&gt;(4)-&gt;(1) | read 1    | read 1 bumps it to the front of the list, the MRU    |
+| 7    | (1)-&gt;(5)-&gt;(4) |           |                                                      |
++------+---------------+-----------+------------------------------------------------------+
+</code></pre><p><em>Table 1: an example of operations and their effect of the LRU cache</em></p>
+<h2 id="mru---most-recently-used">MRU - Most recently used</h2>
+<p>In the case of repeatedly scanning large pieces of data or accessing random
+pages from a very large memory, LRU does not perform very well.
+It has been proven - see <a href="http://code.activestate.com/recipes/576532-adaptive-replacement-cache-in-python/" title="ARC implementation in python">8</a> - that evicting the most recently used page has better
+cache hit rates in this case.</p>
+<p>The implementation is very similar to LRU: the most recently used key is at the head of the list
+and the least recently used key is at the end. The difference is that in MRU, the key that is
+read last - the head of the linked list - is also the key that is evicted before the next write.</p>
+<h2 id="lfu---least-frequently-used">LFU - Least frequently used</h2>
+<p>The intuition for LFU is to keep in the cache the keys that have been most frequently accessed.
+The strategy will evict the page that has been requested the fewest times out of all the pages in the cache.</p>
+<p>In practice, maintaining the complete history of key accesses is not possible, so
+most implementations use an approximate LFU (ALFU) where the access history is
+retained for a limited time window.</p>
+<p>Much like LRU, this implementation also uses a hash map for fast access to a given key.
+Unlike LRU, LFU needs to maintain a set of all the keys in the cache sorted by the frequency of access.
+A double-linked list would not work because the list needs to be kept sorted,
+resulting in O(n) complexity in every operation.</p>
+<p>Since the algorithm only requires access to the least frequently read page and
+doesn&rsquo;t need the rest of the pages to be sorted, a min-heap data structure is a good candidate.
+Writing, reading and promoting keys in a heap are all done in O(logn) time with no
+extra memory - heaps are implemented as arrays.</p>
+<p>In general, when choosing a data structure for an algorithm, the goal is to find
+the structure that exposes no more functionality than what is needed.
+The more extra functionality a data structure has, the more
+expensive its operations are going to be.</p>
+<p>To keep things simple, the implementation in the accompanying repository <a href="https://github.com/topliceanu/cache" title="My Golang implementation for the cache data structures described above">2</a> only
+takes into account the number of hits, not their frequency, or the last time they were accessed. See <a href="https://github.com/patrickmn/go-cache" title="A popular in-memory cache implementation for Golang">12</a>.
+This is not efficient, since a pathological worst case can easily be thought of: a
+key that was requested many times in just one day more than a year ago is likely to be in the cache even if it hasn&rsquo;t been requested since.</p>
+<pre><code>+------+---------------------+-----------+--------------------------------------------------------------+
+| step | state (key, freq)   | operation | effect                                                       |
++------+---------------------+-----------+--------------------------------------------------------------+
+| 1    | ()-&gt;()-&gt;()          | write 3   | add 3 to the empty cache                                     |
+| 2    | (3,1)-&gt;()-&gt;()       | write 2   | add 2 before 3, capacity not reached                         |
+| 3    | (2,1)-&gt;(3,1)-&gt;()    | write 1   | add 1 before 2, capacity not reached                         |
+| 4    | (1,1)-&gt;(2,1)-&gt;(3,1) | read 2    | read 2 bumps its access count to 2, move to back of the heap |
+| 5    | (1,1)-&gt;(3,1)-&gt;(2,2) | read 1    | read 1 bumps its access count to 2, move to back of the heap |
+| 6    | (3,1)-&gt;(2,2)-&gt;(1,2) | write 5   | write 5, evicts 3 because its lowest access count            |
+| 7    | (1,2)-&gt;(2,2)-&gt;(5,1) |           |                                                              |
++------+---------------------+-----------+--------------------------------------------------------------+
+</code></pre><p><em>Table 2: an example of operations and their effect of the LFU cache</em></p>
+<h2 id="scan-resistance">Scan resistance</h2>
+<p>One of the main disadvantages of LRU is that it is not scan-resistant.
+To understand this property, consider an LRU cache with a capacity of n pages.
+Over time, the data in the cache will implicitly capture the key access frequency:
+more popular keys will be near the front of the linked list, the less popular
+ones to the back.</p>
+<p>Consider the case when a client writes a sequence of n all-new pages to the cache.
+All the existing values in the cache will be removed and replaced with the recent writes.
+The implicit key access frequency information is lost.</p>
+<p>For a concrete example, in a relational database where table scans are common,
+the database cache must be resistant to scans to perform well.
+Reference <a href="https://medium.com/@often_weird/what-makes-mysql-lru-cache-scan-resistant-a73364f286d7" title="Blog post about the techniques used in MySQL to make the cache scan resistant">11</a> is a blog post about how MySQL uses a modified LRU cache to make it scan resistant.</p>
+<h2 id="slru">SLRU</h2>
+<p>This cache splits its allocated memory into two LRU segments: probation and protected.</p>
+<ul>
+<li>When a new piece of data is written to the cache, it is first stored in the probation section.</li>
+<li>When a key is read from the cache, it is moved to the head of the protected
+segment, irrespective of whether it was previously located in the protected or the probation sections.</li>
+<li>When an overflow occurs on the probation segment, the evicted key
+is dumped completely from the cache.</li>
+<li>When an overflow occurs on the protected segment, the evicted key is moved to the probation segment,
+giving it another chance to be promoted back to the protected section with another read in the future.</li>
+</ul>
+<pre><code>      #     |    Protected LRU                  Probation LRU    |  Operations
+------------+----------------------------------------------------+----------------------------------------
+     1.     |     -----------                   -------------    | d is evicted from the Protected
+  eviction  |      |a|b|c|d|                     | |x|y|z|t|     | section and it is added into the
+  from      |     --------|--                   --^----------    | head of the Probation section.
+  Probation |             |                       |              |
+            |             +-----------------------+              |
+------------+----------------------------------------------------+-----------------------------------------
+     2.     |     -----------                   -------------    | z is read from the Probation section.
+ hit in     |      | |a|b|c|                     | |x|y|z|t|     | It is moved to the head of Protected.
+ Probation  |     --^-----|--                   --^-----|----    | section. This triggers c to be evicted
+            |       |     +-----------------------+     |        | and moved to the head of Probation.
+            |       +-----------------------------------+        |
+------------+----------------------------------------------------+-----------------------------------------
+     3.     |     -----------                   -------------    | c is read from the Protected section.
+ hit in     |      | |a|b|c|                     | | | | | |     | It is moved to the head of the
+ Protected  |     --^-----|--                   -------------    | Protected section.
+            |       |     |                                      |
+            |       +-----+                                      |
+------------+----------------------------------------------------+-----------------------------------------
+</code></pre><p><em>Table 3: data movement in SLRU under various conditions</em></p>
+<p>SLRU is scan resistant. In the event of a scan, it&rsquo;s only the probation section that is flushed.
+Keys need to be requested at least two times to be promoted in the protected section.
+So the protected section can now maintain the implicit frequency information.</p>
+<p>The ratio between the sizes of the protected and probation sections is also a tunable parameter.</p>
+<h2 id="lfru---least-frequent-recently-used">LFRU - Least Frequent Recently Used</h2>
+<p>Resistance to a single scan proves very useful in the general case, but for databases,
+where table scans are the norm, if two table scans happen one after the other then
+the same problem occurs.</p>
+<p>A variation of SLRU is LFRU, or Least Frequent Recently Used.
+It also splits the allocated memory into two sections, this time called privileged (LRU) and unprivileged (LFU).
+The aim is to promote to the privileged section only the pages that have a high rate of requests, thus filtering out locally popular pages.</p>
+<p>When a cache miss occurs, the client will write the data page in the cache. It will be
+stored in the unprivileged section - a max heap sorted by frequency of access -
+at the back of the heap. Popular items are promoted from
+the unprivileged section into the LRU privileged section.</p>
+<h2 id="arc---adaptive-replacement-cache">ARC - Adaptive replacement cache</h2>
+<p>Much like SLRU in the previous section, the idea with ARC is to improve on LRU.
+Arc outperforms LRU by automatically adapting to the changing input data.
+If the input follows a normal distribution, ARC will increase the capacity of the
+frequency-optimized LRU segment. If the input tends toward a uniform distribution,
+ARC allocated more of the available memory to the recency optimizes LRU segment
+which performs better under these circumstances.</p>
+<pre><code>    . . . [   b1  &lt;-[     t1    &lt;-!-&gt;      t2   ]-&gt;  b2   ] . . .
+          [ . . .  l1 . . . . . . ! . .^. . . . l2  . . . ]
+</code></pre><p><em>Figure 2. ARC data structure</em></p>
+<p>ARC splits the memory into 2 sections L1 and L2, each further split into two sections T1, B1, T2 and B2:</p>
+<ul>
+<li>T1 holds items that have been requested only once</li>
+<li>T2 hold items that were requested at least twice, much like SLRU</li>
+<li>Whenever a page is evicted from T1 it is recorded in B1.</li>
+<li>Likewise, evictions from T2 are added to B2.</li>
+</ul>
+<p>B1 and B2 are not part of the cache, they only hold metadata of the evicted pages.
+The ratio of evictions into B1 and B2 determines the sizes of T1 and T2.
+When more pages are evicted from T1 than T2, the cache will rebalance to give more memory to T1.</p>
+<p>ARC and variants of it are widely used in the industry, most notably ZFS,
+Postgresql and VMWare vSAN.</p>
+<h2 id="benchmarks">Benchmarks</h2>
+<p>The performance indicators of the cache are the speed of reads and writes,
+the extra memory used to store the data and the cache hit rate
+(number of hits / total number of requests).</p>
+<p>Inspired by <a href="https://github.com/Xeoncross/go-cache-benchmark" title="For production use, David Pennington made a benchmark to compare different Golang cache implementations">3</a>, the accompanying implementation <a href="https://github.com/topliceanu/cache" title="My Golang implementation for the cache data structures described above">2</a> contains read/write benchmarks
+for all algorithms described above. <em>Listing 1</em> contains a set of benchmark results.</p>
+<pre><code>$ ./script/benchmark
+goos: linux
+goarch: amd64
+pkg: github.com/topliceanu/cache/benchmark
+BenchmarkCache/cache-lru/Write()-4       3983329     293.0 ns/op     32 B/op     1 allocs/op
+BenchmarkCache/cache-lru/Read()-4       38942666      30.9 ns/op      0 B/op     0 allocs/op
+BenchmarkCache/cache-lfu/Write()-4       5492858     229.0 ns/op     31 B/op     0 allocs/op
+BenchmarkCache/cache-lfu/Read()-4       36854689      30.5 ns/op      0 B/op     0 allocs/op
+BenchmarkCache/cache-mru/Write()-4       5892952     217.0 ns/op     31 B/op     0 allocs/op
+BenchmarkCache/cache-mru/Read()-4      174675004       6.9 ns/op      0 B/op     0 allocs/op
+BenchmarkCache/cache-slru/Write()-4      3704128     339.0 ns/op     32 B/op     1 allocs/op
+BenchmarkCache/cache-slru/Read()-4      16276162      69.6 ns/op      0 B/op     0 allocs/op
+BenchmarkCache/cache-lfru/Write()-4      3918639     316.0 ns/op     32 B/op     1 allocs/op
+BenchmarkCache/cache-lfru/Read()-4      16141981      65.3 ns/op      0 B/op     0 allocs/op
+BenchmarkCache/cache-arc/Write()-4       1901154     634.0 ns/op     65 B/op     2 allocs/op
+BenchmarkCache/cache-arc/Read()-4       12199518      88.9 ns/op      0 B/op     0 allocs/op
+PASS
+ok      github.com/topliceanu/cache/benchmark   19.684s
+</code></pre><p><em>Listing 1: Read/Write benchmarks for the cache implementations</em></p>
+<p>As expected the more complex caches take more time and more memory.</p>
+<p>The cache hit rate is application-specific.
+Picking the appropriate cache replacement strategy depends on the access distribution
+of data in each application. The accompanying project to this blog post has a tool
+that generates random data - 1M integers, 10k cardinality - and calculates hit
+and miss rates for each cache algorithm described above where cache size is configured to 1000.</p>
+<p>The results are not useful because the randomly generated data is not similar to
+typical production workloads.</p>
+<pre><code>$ go run cmd/hit-rate/main.go
+Cache type    Hit rate   Miss rate
+ cache-lru    9.990      90.010
+ cache-lfu    9.997      90.003
+ cache-mru    9.993      90.007
+cache-slru    9.934      90.066
+cache-lfru    9.992      90.008
+ cache-arc    9.941      90.059
+</code></pre><h2 id="conclusion">Conclusion</h2>
+<p>The perfect cache solution was described by Belady in 1960 and states that the
+best value to discard is the one that you know you are going to need furthest
+in the future. While intuitive, it is not possible to implement it. In general,
+we cannot know when a piece of data will be requested in the future.
+Belady&rsquo;s contribution, however, is to produce a formal proof that this indeed the
+optimal caching algorithm. Its purpose is to act as the ideal benchmark for
+comparison for other implementations.</p>
+<p>When designing your cache implementation, you want to take into consideration the
+historical data access patterns for your specific use-case, if the extra effort
+to design and implement it is reasonable.</p>
+<h2 id="endnotes">Endnotes</h2>
+<p>Thank you for getting this far. I hope you learned something new.
+I plan to explore ARC some more and come back with a comprehensive description.</p>
+<p>Please leave comments on <a href="">Hacker News</a>, on <a href="">Lobste.rs</a> or on <a href="">Reddit</a>.</p>
+<p>The source for this post is on <a href="https://github.com/topliceanu/alexandrutopliceanu.ro">github.com/topliceanu/alexandrutopliceanu.ro</a>,
+If you open an issue or a PR to make improvements, I would very much appreciate it!</p>
+<h2 id="resources">Resources</h2>
+<ol>
+<li><a href="https://en.wikipedia.org/wiki/Cache_replacement_policies">link</a> &ldquo;This Wikipedia page describes a large list of cache replacement strategies. It&rsquo;s beautiful!&rdquo;</li>
+<li><a href="https://github.com/topliceanu/cache">link</a> &ldquo;My Golang implementation for the cache data structures described above&rdquo;</li>
+<li><a href="https://github.com/Xeoncross/go-cache-benchmark">link</a> &ldquo;For production use, David Pennington made a benchmark to compare different Golang cache implementations&rdquo;</li>
+<li><a href="https://youtu.be/Dh7vmvk9huM">link</a> &ldquo;Professor Tim Roughgarden, in his popular MOOC &lsquo;Introduction to Algorithms, Part 2&rsquo;, has a section where he introduces the caching problem and Belady&rsquo;s ideal cache algorithm.&rdquo;</li>
+<li><a href="https://arxiv.org/pdf/1702.04078.pdf">link</a> &ldquo;LFRU paper&rdquo;</li>
+<li><a href="https://lrita.github.io/images/posts/datastructure/ARC.pdf">link</a> &ldquo;Not the original ARC paper but a simplified version written by the same authors&rdquo;</li>
+<li><a href="https://en.wikipedia.org/wiki/Adaptive_replacement_cache">link</a> &ldquo;ARC Wikipedia page is very good if you want a TL;DR&rdquo;</li>
+<li><a href="http://code.activestate.com/recipes/576532-adaptive-replacement-cache-in-python/">link</a> &ldquo;ARC implementation in python&rdquo;</li>
+<li><a href="http://www.vldb.org/conf/1985/P127.PDF">link</a> &ldquo;MRU paper with experimental data of when it performs better than LRU&rdquo;</li>
+<li><a href="https://pdfs.semanticscholar.org/eacf/df93e03d9dbbbaa2d01250939d9f94fb16a4.pdf">link</a> &ldquo;Belady&rsquo;s MIN optimal cache paper&rdquo;</li>
+<li><a href="https://medium.com/@often_weird/what-makes-mysql-lru-cache-scan-resistant-a73364f286d7">link</a> &ldquo;Blog post about the techniques used in MySQL to make the cache scan resistant&rdquo;</li>
+<li><a href="https://github.com/patrickmn/go-cache">link</a> &ldquo;A popular in-memory cache implementation for Golang&rdquo;</li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+</section>
+
+
+
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+    
+  </div>
+</section>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-24987736-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+</body>
+</html>
+
