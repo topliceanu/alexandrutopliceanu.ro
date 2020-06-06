@@ -1,7 +1,7 @@
 +++
 title = "Cache Data Structures"
 date = "2020-04-22T11:11:00Z"
-draft = true
+draft = false
 +++
 
 ## Intro
@@ -86,6 +86,7 @@ the invariant that the nodes that were requested recently are at the head of the
 Discarding the last used node as well as promoting recently accessed nodes is
 as easy as updating a few pointers in constanst time.
 
+```
 +------+---------------+-----------+------------------------------------------------------+
 | step | state (list)  | operation | effect                                               |
 +------+---------------+-----------+------------------------------------------------------+
@@ -97,6 +98,7 @@ as easy as updating a few pointers in constanst time.
 | 6    | (5)->(4)->(1) | read 1    | read 1 bumps it to the front of the list, the MRU    |
 | 7    | (1)->(5)->(4) |           |                                                      |
 +------+---------------+-----------+------------------------------------------------------+
+```
 _Table 1: an example of operations and their effect of the LRU cache_
 
 ## MRU - Most recently used
@@ -139,6 +141,7 @@ This is not accurate, since there is a pathological worst case use-case where a 
 that was requested many times in just one day a year ago is likely to still be in the
 cache even if it hasn't been requested since.
 
+```
 +------+---------------------+-----------+--------------------------------------------------------------+
 | step | state (key, freq)   | operation | effect                                                       |
 +------+---------------------+-----------+--------------------------------------------------------------+
@@ -150,6 +153,7 @@ cache even if it hasn't been requested since.
 | 6    | (3,1)->(2,2)->(1,2) | write 5   | write 5, evicts 3 because its lowest access count            |
 | 7    | (1,2)->(2,2)->(5,1) |           |                                                              |
 +------+---------------------+-----------+--------------------------------------------------------------+
+```
 _Table 2: an example of operations and their effect of the LFU cache_
 
 ## Scan resistence
@@ -331,19 +335,30 @@ Thank you for getting this far. I hope you learned something new.
 I plan to explore ARC some more and come back with a comprehensive description.
 
 Please leave comments on [Hacker News](), on [Lobste.rs]() or on [Reddit]().
+
 The source for this post is on [github.com/topliceanu/alexandrutopliceanu.ro](https://github.com/topliceanu/alexandrutopliceanu.ro),
 If you open an issue or a PR to make improvements, I would very much appreciate it!
 
 ## Resources
 
 [1]: https://en.wikipedia.org/wiki/Cache_replacement_policies This Wikipedia page describes a large list of cache replacement strategies. It's beautiful!
+
 [2]: https://github.com/topliceanu/cache My Golang implementation for the cache data structures described above
+
 [3]: https://github.com/Xeoncross/go-cache-benchmark For production use, David Pennington made a benchmark to compare different golang cache implementations
+
 [4]: https://youtu.be/Dh7vmvk9huM Professor Tim Roughgarden, in his popular MOOC "Introduction to Algorithms, Part 2", has a section where he introduces the caching problem and Belady's ideal cache algorithm.
+
 [5]: https://arxiv.org/pdf/1702.04078.pdf LFRU paper
+
 [6]: https://lrita.github.io/images/posts/datastructure/ARC.pdf Not the original ARC paper but a simplified version written by the same authors
+
 [7]: https://en.wikipedia.org/wiki/Adaptive_replacement_cache ARC wikipedia page is very good if you want a TL;DR
+
 [8]: http://code.activestate.com/recipes/576532-adaptive-replacement-cache-in-python/ ARC implementation in python
+
 [9]: http://www.vldb.org/conf/1985/P127.PDF MRU paper with experimental data of when it perform better than LRU
+
 [10]: https://pdfs.semanticscholar.org/eacf/df93e03d9dbbbaa2d01250939d9f94fb16a4.pdf Belady's MIN optimal cache paper
+
 [11]: https://medium.com/@often_weird/what-makes-mysql-lru-cache-scan-resistant-a73364f286d7 Blog post about the techniques used in MySQL to make the cache scan resistent
