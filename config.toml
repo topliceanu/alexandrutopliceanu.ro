@@ -10,26 +10,17 @@ theme = "kiss"
 Paginate = 10
 enableRobotsTXT = true
 
+[params.rss]
+includeContent = true
+authorName = "Alexandru Topliceanu"
+authorEmail = "alexandru.topliceanu@gmail.com"
+
 [params.social]
 twitter = "topliceanu"
 github = "topliceanu"
 email = "alexandru.topliceanu@gmail.com"
 linkedin = "alexandrutopliceanu"
+rss = "index.xml"
 
 [params.social.config]
-platforms = ["github","twitter","email","linkedin"]
-
-
-
-#[params]
-#  sitename = "Alexandru Topliceanu"
-#[[menu.main]]
-#  name = "Github"
-#  url  = "https://github.com/topliceanu"
-#[[menu.main]]
-#  name = "Twitter"
-#  url  = "https://twitter.com/topliceanu"
-#[[menu.main]]
-#  name = "Email"
-#  url  = "mailto:alexandru.topliceanu@gmail.com"
-
+platforms = ["rss","github","twitter","email","linkedin"]
